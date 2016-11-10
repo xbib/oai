@@ -27,13 +27,6 @@ public class RdfSimpleMetadataHandler extends SimpleMetadataHandler implements O
 
     private RdfContentParams params;
 
-    public static IRINamespaceContext getDefaultContext() {
-        IRINamespaceContext context = IRINamespaceContext.newInstance();
-        context.addNamespace(DC_PREFIX, DC_NS_URI);
-        context.addNamespace(OAIDC_NS_PREFIX, OAIDC_NS_URI);
-        return context;
-    }
-
     public RdfSimpleMetadataHandler() {
         this(RdfSimpleMetadataHandler::getDefaultContext);
     }
@@ -44,6 +37,13 @@ public class RdfSimpleMetadataHandler extends SimpleMetadataHandler implements O
         // set up our default handler
         this.handler = new RdfResourceHandler(params);
         handler.setDefaultNamespace(NS_PREFIX, NS_URI);
+    }
+
+    public static IRINamespaceContext getDefaultContext() {
+        IRINamespaceContext context = IRINamespaceContext.newInstance();
+        context.addNamespace(DC_PREFIX, DC_NS_URI);
+        context.addNamespace(OAIDC_NS_PREFIX, OAIDC_NS_URI);
+        return context;
     }
 
     public IRINamespaceContext getContext() {

@@ -109,9 +109,9 @@ public class DefaultOAIClient implements OAIClient {
         if (token == null) {
             return null;
         }
-        request = newIdentifyRequest();
-        request.setResumptionToken(token);
-        return request;
+        IdentifyRequest nextRequest = newIdentifyRequest();
+        nextRequest.setResumptionToken(token);
+        return nextRequest;
     }
 
     @Override
@@ -123,9 +123,9 @@ public class DefaultOAIClient implements OAIClient {
         if (token == null) {
             return null;
         }
-        request = newListRecordsRequest();
-        request.setResumptionToken(token);
-        return request;
+        ListRecordsRequest nextRequest = newListRecordsRequest();
+        nextRequest.setResumptionToken(token);
+        return nextRequest;
     }
 
     @Override
@@ -137,9 +137,9 @@ public class DefaultOAIClient implements OAIClient {
         if (token == null) {
             return null;
         }
-        request = newListIdentifiersRequest();
-        request.setResumptionToken(token);
-        return request;
+        ListIdentifiersRequest nextRequest = newListIdentifiersRequest();
+        nextRequest.setResumptionToken(token);
+        return nextRequest;
     }
 
     @Override
@@ -151,9 +151,9 @@ public class DefaultOAIClient implements OAIClient {
         if (token == null) {
             return null;
         }
-        request = newListMetadataFormatsRequest();
-        request.setResumptionToken(token);
-        return request;
+        ListMetadataFormatsRequest nextRequest = newListMetadataFormatsRequest();
+        nextRequest.setResumptionToken(token);
+        return nextRequest;
     }
 
     @Override
@@ -165,9 +165,9 @@ public class DefaultOAIClient implements OAIClient {
         if (token == null) {
             return null;
         }
-        request = newListSetsRequest();
-        request.setResumptionToken(token);
-        return request;
+        ListSetsRequest nextRequest = newListSetsRequest();
+        nextRequest.setResumptionToken(token);
+        return nextRequest;
     }
 
     @Override
@@ -179,13 +179,13 @@ public class DefaultOAIClient implements OAIClient {
         if (token == null) {
             return null;
         }
-        request = newGetRecordRequest();
-        request.setResumptionToken(token);
-        return request;
+        GetRecordRequest nextRequest = newGetRecordRequest();
+        nextRequest.setResumptionToken(token);
+        return nextRequest;
     }
 
     @Override
     public void close() throws IOException {
-
+        // nothing to close
     }
 }

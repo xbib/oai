@@ -2,8 +2,6 @@ package org.xbib.oai.server.identify;
 
 import org.xbib.oai.server.ServerOAIResponse;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,10 +27,6 @@ public class IdentifyServerResponse extends ServerOAIResponse {
     private String granularity;
 
     private String compression;
-
-    @Override
-    public void to(Writer writer) throws IOException {
-    }
 
     public void setRepositoryName(String repositoryName) {
         this.repositoryName = repositoryName;

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.ConnectException;
 import java.net.URI;
+import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -40,10 +41,10 @@ public class DOAJClientTest {
     private static final Logger logger = LogManager.getLogger(DOAJClientTest.class.getName());
 
     @Test
-    public void testListRecordsDOAJ() throws InterruptedException, TimeoutException, IOException {
+    public void testListRecordsDOAJ() throws Exception {
         try {
             // will redirect to https://doaj.org/oai
-            OAIClient oaiClient = OAIClientFactory.newClient("http://doaj.org/oai", true);
+            OAIClient oaiClient = new DefaultOAIClient().setURL(new URL("http://doaj.org/oai"), true);
             IdentifyRequest identifyRequest = oaiClient.newIdentifyRequest();
             HttpClient client = oaiClient.getHttpClient();
             AggregatedHttpMessage response = client.execute(HttpHeaders.of(HttpMethod.GET, identifyRequest.getPath())

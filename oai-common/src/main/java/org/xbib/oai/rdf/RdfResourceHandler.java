@@ -25,9 +25,8 @@ public class RdfResourceHandler extends AbstractXmlResourceHandler<RdfContentPar
 
     @Override
     public boolean isResourceDelimiter(QName name) {
-        boolean b = OAIDC_NS_URI.equals(name.getNamespaceURI())
+        return OAIDC_NS_URI.equals(name.getNamespaceURI())
                 && DC_PREFIX.equals(name.getLocalPart());
-        return b;
     }
 
     @Override
@@ -43,6 +42,7 @@ public class RdfResourceHandler extends AbstractXmlResourceHandler<RdfContentPar
         // do nothing
     }
 
+    @Override
     public Object toObject(QName parent, String content) {
         return content;
     }

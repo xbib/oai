@@ -51,7 +51,7 @@ public class ListRecordsResponse implements ClientOAIResponse {
 
     public ListRecordsResponse(ListRecordsRequest request) {
         this.request = request;
-        this.retryAfterMillis = 20 * 1000; // 20 seconds by default
+        this.retryAfterMillis = 20L * 1000L; // 20 seconds by default
     }
 
     public ListRecordsResponse setRetryAfter(long millis) {
@@ -141,10 +141,6 @@ public class ListRecordsResponse implements ClientOAIResponse {
         } catch (TransformerException t) {
             throw new IOException(t);
         }
-    }
-
-    @Override
-    public void to(Writer writer) throws IOException {
     }
 
     private boolean isDigits(String str) {

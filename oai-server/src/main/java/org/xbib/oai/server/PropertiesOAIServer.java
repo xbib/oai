@@ -25,23 +25,23 @@ import java.util.Properties;
  */
 public class PropertiesOAIServer implements OAIServer {
 
-    public static final String ADAPTER_URI = "uri";
+    private static final String ADAPTER_URI = "uri";
 
-    public static final String STYLESHEET = "stylesheet";
+    private static final String STYLESHEET = "stylesheet";
 
-    public static final String REPOSITORY_NAME = "identify.repositoryName";
+    private static final String REPOSITORY_NAME = "identify.repositoryName";
 
-    public static final String BASE_URL = "identify.baseURL";
+    private static final String BASE_URL = "identify.baseURL";
 
-    public static final String PROTOCOL_VERSION = "identify.protocolVersion";
+    private static final String PROTOCOL_VERSION = "identify.protocolVersion";
 
-    public static final String ADMIN_EMAIL = "identify.adminEmail";
+    private static final String ADMIN_EMAIL = "identify.adminEmail";
 
-    public static final String EARLIEST_DATESTAMP = "identify.earliestDatestamp";
+    private static final String EARLIEST_DATESTAMP = "identify.earliestDatestamp";
 
-    public static final String DELETED_RECORD = "identify.deletedRecord";
+    private static final String DELETED_RECORD = "identify.deletedRecord";
 
-    public static final String GRANULARITY = "identify.granularity";
+    private static final String GRANULARITY = "identify.granularity";
 
     private Properties properties;
 
@@ -115,30 +115,36 @@ public class PropertiesOAIServer implements OAIServer {
     @Override
     public void identify(IdentifyServerRequest request, IdentifyServerResponse response)
             throws OAIException {
+        // not implemented yet
     }
 
     @Override
     public void listMetadataFormats(ListMetadataFormatsServerRequest request, ListMetadataFormatsServerResponse response)
             throws OAIException {
+        // not implemented yet
     }
 
     @Override
     public void listSets(ListSetsServerRequest request, ListSetsServerResponse response)
             throws OAIException {
+        // not implemented yet
     }
 
     @Override
     public void listIdentifiers(ListIdentifiersServerRequest request, ListIdentifiersServerResponse response)
             throws OAIException {
+        // not implemented yet
     }
 
     @Override
     public void listRecords(ListRecordsServerRequest request, ListRecordsServerResponse response)
             throws OAIException {
+        // not implemented yet
     }
 
     @Override
     public void getRecord(GetRecordServerRequest request, GetRecordServerResponse response)
             throws OAIException {
+        // not implemented yet
     }
 }

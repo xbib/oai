@@ -9,7 +9,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.logging.Level;
@@ -95,8 +95,11 @@ public class ListRecordsFilterReader extends XMLFilterReader {
                             request.setResumptionToken(token);
                         }
                     } catch (Exception e) {
+                        logger.log(Level.FINE, e.getMessage(), e);
                         throw new SAXException(e);
                     }
+                    break;
+                default:
                     break;
             }
             return;
@@ -148,17 +151,25 @@ public class ListRecordsFilterReader extends XMLFilterReader {
                     break;
                 case "datestamp":
                     if (header != null && content != null && content.length() > 0) {
+                        String s = content.toString().trim();
                         try {
-                            header.setDate(Instant.parse(content.toString().trim()));
+                            header.setDate(Instant.parse(s));
                         } catch (DateTimeParseException e) {
-                            // not "seconds ISO"
-                        }
-                        try {
-                            LocalDateTime ldt = LocalDateTime.parse(content.toString().trim(),
-                                    DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                            header.setDate(Instant.from(ldt));
-                        } catch (DateTimeParseException e) {
-                            // not "day ISO"
+                            logger.log(Level.FINEST, e.getMessage(), e);
+                            try {
+                                ZonedDateTime zonedDateTime = ZonedDateTime.parse(s,
+                                        DateTimeFormatter.ISO_DATE_TIME);
+                                header.setDate(Instant.from(zonedDateTime));
+                            } catch (DateTimeParseException e1) {
+                                logger.log(Level.FINEST, e1.getMessage(), e1);
+                                try {
+                                    ZonedDateTime zonedDateTime = ZonedDateTime.parse(s,
+                                            DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                    header.setDate(Instant.from(zonedDateTime));
+                                } catch (DateTimeParseException e2) {
+                                    logger.log(Level.FINEST, e2.getMessage(), e2);
+                                }
+                            }
                         }
                     }
                     break;
@@ -166,6 +177,8 @@ public class ListRecordsFilterReader extends XMLFilterReader {
                     if (header != null && content != null && content.length() > 0) {
                         header.setSetspec(content.toString().trim());
                     }
+                    break;
+                default:
                     break;
             }
             if (content != null) {

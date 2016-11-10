@@ -2,18 +2,12 @@ package org.xbib.oai.server.listrecords;
 
 import org.xbib.oai.server.ServerOAIResponse;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  */
 public class ListRecordsServerResponse extends ServerOAIResponse {
-
-    private static final Logger logger = Logger.getLogger(ListRecordsServerResponse.class.getName());
 
     private String error;
 
@@ -41,18 +35,8 @@ public class ListRecordsServerResponse extends ServerOAIResponse {
         this.expire = expire;
     }
 
-    @Override
-    public void to(Writer writer) throws IOException {
-        try {
-            if (this.expire > 0L) {
-                logger.log(Level.INFO, "waiting for {} seconds (retry-after)", expire);
-                Thread.sleep(1000 * expire);
-                this.expire = 0L;
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.log(Level.WARNING, "interrupted");
-        }
+    public long getExpire() {
+        return expire;
     }
 
 }

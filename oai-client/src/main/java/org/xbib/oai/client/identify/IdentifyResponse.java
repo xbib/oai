@@ -53,10 +53,6 @@ public class IdentifyResponse implements ClientOAIResponse {
         }
     }
 
-    @Override
-    public void to(Writer writer) throws IOException {
-    }
-
     public void setRepositoryName(String repositoryName) {
         this.repositoryName = repositoryName;
     }

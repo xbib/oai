@@ -11,11 +11,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Client OAI request
  */
 public class ClientOAIRequest implements OAIRequest {
+
+    private static final Logger logger = Logger.getLogger(ClientOAIRequest.class.getName());
 
     private URIBuilder uriBuilder;
 
@@ -44,6 +48,7 @@ public class ClientOAIRequest implements OAIRequest {
                     .authority(uri.getAuthority())
                     .path(uri.getPath());
         } catch (URISyntaxException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
             throw new IllegalArgumentException("invalid URI " + url);
         }
     }
@@ -108,15 +113,16 @@ public class ClientOAIRequest implements OAIRequest {
         return until;
     }
 
+    @Override
     public void setResumptionToken(ResumptionToken<?> token) {
         this.token = token;
         if (token != null && token.toString() != null) {
             // resumption token may have characters that are illegal in URIs like '|'
-            //String tokenStr = URIFormatter.encode(token.toString(), StandardCharsets.UTF_8);
             addParameter(OAIConstants.RESUMPTION_TOKEN_PARAMETER, token.toString());
         }
     }
 
+    @Override
     public ResumptionToken<?> getResumptionToken() {
         return token;
     }

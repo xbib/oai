@@ -23,13 +23,15 @@ public abstract class AbstractVerb {
 
     private static final XMLEventFactory eventFactory = XMLEventFactory.newInstance();
 
-    protected final ServerOAIRequest request;
-
-    protected final ServerOAIResponse response;
+    private static final TimeZone tz = TimeZone.getTimeZone("GMT");
 
     private static final String NS_URI = "http://www.w3.org/2001/XMLSchema-instance";
 
     private static final String NS_PREFIX = "xsi";
+
+    private final ServerOAIRequest request;
+
+    private final ServerOAIResponse response;
 
     public AbstractVerb(ServerOAIRequest request, ServerOAIResponse response) {
         this.request = request;
@@ -102,8 +104,6 @@ public abstract class AbstractVerb {
         }
     }
 
-    private final TimeZone tz = TimeZone.getTimeZone("GMT");
-    
     private String formatDate(Date date) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         format.setTimeZone(tz);

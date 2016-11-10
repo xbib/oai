@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.URL;
 import java.time.Instant;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -34,7 +35,7 @@ public class DNBClientTest {
 
     @Test
     public void testIdentify() throws Exception {
-        OAIClient client = OAIClientFactory.newClient("http://services.dnb.de/oai/repository");
+        OAIClient client = new DefaultOAIClient().setURL(new URL("http://services.dnb.de/oai/repository"));
         IdentifyRequest request = client.newIdentifyRequest();
         HttpClient httpClient = client.getHttpClient();
         assertEquals("/oai/repository?verb=Identify", request.getPath());
@@ -45,7 +46,7 @@ public class DNBClientTest {
     @Test
     public void testListRecordsDNB() throws Exception {
         try {
-            OAIClient client = OAIClientFactory.newClient("http://services.dnb.de/oai/repository");
+            OAIClient client = new DefaultOAIClient().setURL(new URL("http://services.dnb.de/oai/repository"));
             ListRecordsRequest listRecordsRequest = client.newListRecordsRequest();
             listRecordsRequest.setFrom(Instant.parse("2016-01-01T00:00:00Z"));
             listRecordsRequest.setUntil(Instant.parse("2016-01-10T00:00:00Z"));

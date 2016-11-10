@@ -6,14 +6,17 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 
 import java.io.Writer;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
@@ -27,13 +30,15 @@ import javax.xml.stream.events.Namespace;
  */
 public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements OAIConstants {
 
-    private final XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+    private static final Logger logger = Logger.getLogger(XmlSimpleMetadataHandler.class.getName());
 
-    private final XMLEventFactory eventFactory = XMLEventFactory.newInstance();
+    private static final XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+
+    private static final XMLEventFactory eventFactory = XMLEventFactory.newInstance();
 
     private List<String> namespaces = new ArrayList<>();
 
-    private Stack<Collection<?>> nsStack = new Stack<>();
+    private Deque<Collection<?>> nsStack = new ArrayDeque<>();
 
     private Locator locator;
 
@@ -51,7 +56,7 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
             outputFactory.setProperty("javax.xml.stream.isRepairingNamespaces", Boolean.TRUE);
             this.eventWriter = outputFactory.createXMLEventWriter(writer);
         } catch (XMLStreamException e) {
-            // ignore
+            logger.log(Level.FINE, e.getMessage(), e);
         }
         return this;
     }
@@ -118,13 +123,15 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
         if (eventWriter == null) {
             return;
         }
-        if (prefix == null) {
-            prefix = "";
-        } else if (prefix.equals("xml")) {
-            return;
-        }
         if (namespaces == null) {
             namespaces = new ArrayList<>();
+        }
+        if (prefix == null) {
+            namespaces.add("");
+            namespaces.add(namespaceURI);
+            return;
+        } else if ("xml".equals(prefix)) {
+            return;
         }
         namespaces.add(prefix);
         namespaces.add(namespaceURI);
@@ -132,6 +139,7 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
 
     @Override
     public void endPrefixMapping(String string) throws SAXException {
+        // not used
     }
 
     @Override
@@ -143,8 +151,7 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
             try {
                 eventWriter.add(eventFactory.createStartDocument());
             } catch (XMLStreamException e) {
-                // is thrown because of document encoding - commented out
-                //throw new SAXException(e);
+                logger.log(Level.FINE, e.getMessage(), e);
             }
             needToCallStartDocument = false;
         }
@@ -169,7 +176,7 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
         }
         String[] q = {null, null};
         parseQName(qname, q);
-        Collection<?> nsList = nsStack.remove(nsStack.size() - 1);
+        Collection<?> nsList = nsStack.getLast();
         Iterator<?> nsIter = nsList.iterator();
         try {
             eventFactory.setLocation(getCurrentLocation());
@@ -234,12 +241,13 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
                 attrs.add(attribute);
             }
         }
-        events[0] = nsMap == null ? Collections.EMPTY_LIST : nsMap.values();
-        events[1] = attrs == null ? Collections.EMPTY_LIST : attrs;
+        events[0] = nsMap == null ? Collections.emptyList() : nsMap.values();
+        events[1] = attrs == null ? Collections.emptyList() : attrs;
     }
 
     private void parseQName(String qName, String[] results) {
-        String prefix, local;
+        String prefix;
+        String local;
         int idx = qName.indexOf(':');
         if (idx >= 0) {
             prefix = qName.substring(0, idx);
@@ -273,22 +281,27 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
             systemId = locator.getSystemId();
         }
 
+        @Override
         public int getLineNumber() {
             return lineNumber;
         }
 
+        @Override
         public int getColumnNumber() {
             return columnNumber;
         }
 
+        @Override
         public int getCharacterOffset() {
             return -1;
         }
 
+        @Override
         public String getPublicId() {
             return publicId;
         }
 
+        @Override
         public String getSystemId() {
             return systemId;
         }

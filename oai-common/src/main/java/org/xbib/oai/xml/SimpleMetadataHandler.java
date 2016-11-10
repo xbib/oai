@@ -10,11 +10,13 @@ public class SimpleMetadataHandler extends XMLFilterReader implements MetadataHa
     
     private RecordHeader header;
 
+    @Override
     public SimpleMetadataHandler setHeader(RecordHeader header) {
         this.header = header;
         return this;
     }
-    
+
+    @Override
     public RecordHeader getHeader() {
         return header;
     }

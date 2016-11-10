@@ -12,12 +12,7 @@ import java.io.Writer;
 public class GetRecordResponse implements ClientOAIResponse {
 
     @Override
-    public void to(Writer writer) throws IOException {
-
-    }
-
-    @Override
     public void receivedResponse(AggregatedHttpMessage message, Writer writer) throws IOException {
-
+        // not implemented yet
     }
 }

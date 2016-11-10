@@ -21,7 +21,6 @@ public class SimpleServiceTest {
         IdentifyServerResponse response = new IdentifyServerResponse();
         response.setConsumer(factory.createXMLEventWriter(sw));
         service.identify(request, response);
-        response.to(sw);
     }
 
 }

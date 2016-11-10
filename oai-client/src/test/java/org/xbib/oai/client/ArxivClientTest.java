@@ -23,6 +23,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.ConnectException;
+import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -39,7 +40,7 @@ public class ArxivClientTest {
     @Test
     public void testListRecordsArxiv() throws Exception {
         try {
-            OAIClient client = OAIClientFactory.newClient("http://export.arxiv.org/oai2");
+            OAIClient client = new DefaultOAIClient().setURL(new URL("http://export.arxiv.org/oai2"));
             IdentifyRequest identifyRequest = client.newIdentifyRequest();
             HttpClient httpClient = client.getHttpClient();
             AggregatedHttpMessage response = httpClient.execute(HttpHeaders.of(HttpMethod.GET, identifyRequest.getPath())
