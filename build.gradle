@@ -1,0 +1,71 @@
+plugins {
+    id "org.sonarqube" version "2.2"
+    id "org.ajoberstar.github-pages" version "1.6.0-rc.1"
+    id "org.xbib.gradle.plugin.jbake" version "1.1.0"
+}
+
+allprojects {
+
+    group = 'org.xbib'
+    version = '1.0.0'
+
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'signing'
+    apply plugin: 'findbugs'
+    apply plugin: 'pmd'
+    apply plugin: 'checkstyle'
+    apply plugin: "jacoco"
+
+    repositories {
+        mavenCentral()
+    }
+
+    configurations {
+        wagon
+    }
+
+    dependencies {
+        testCompile 'junit:junit:4.12'
+        testCompile 'org.apache.logging.log4j:log4j-core:2.7'
+        testCompile 'org.apache.logging.log4j:log4j-jul:2.7'
+        wagon 'org.apache.maven.wagon:wagon-ssh-external:2.10'
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:all" << "-profile" << "compact2"
+    }
+
+    test {
+        testLogging {
+            showStandardStreams = false
+            exceptionFormat = 'full'
+        }
+        systemProperty 'java.util.logging.manager', 'org.apache.logging.log4j.jul.LogManager'
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier 'sources'
+        from sourceSets.main.allSource
+    }
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier 'javadoc'
+    }
+    artifacts {
+        archives sourcesJar, javadocJar
+    }
+    if (project.hasProperty('signing.keyId')) {
+        signing {
+            sign configurations.archives
+        }
+    }
+
+    apply from: "${rootProject.projectDir}/gradle/ext.gradle"
+    apply from: "${rootProject.projectDir}/gradle/publish.gradle"
+    apply from: "${rootProject.projectDir}/gradle/sonarqube.gradle"
+
+}

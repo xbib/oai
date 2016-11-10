@@ -1,0 +1,12 @@
+ext {
+    user = 'xbib'
+    projectName = 'oai'
+    projectDescription = 'Open Archive Initiative library for Java'
+    scmUrl = 'https://github.com/xbib/oai'
+    scmConnection = 'scm:git:git://github.com/xbib/oai.git'
+    scmDeveloperConnection = 'scm:git:git://github.com/xbib/oai.git'
+    versions = [
+            'tcnative': '1.1.33.Fork23',
+            'alpnboot': '8.1.9.v20160720'
+    ]
+}

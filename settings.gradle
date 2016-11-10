@@ -1,0 +1,4 @@
+rootProject.name = 'oai'
+include 'oai-common'
+include 'oai-client'
+include 'oai-server'

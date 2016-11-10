@@ -1,0 +1,6 @@
+dependencies {
+    compile "org.xbib:content-rdf:1.0.3"
+    //testCompile "xerces:xercesImpl:${versions.xerces}"
+    //testCompile "xalan:xalan:${versions.xalan}"
+    //testCompile "com.fasterxml.woodstox:woodstox-core:${versions.woodstox}"
+}
