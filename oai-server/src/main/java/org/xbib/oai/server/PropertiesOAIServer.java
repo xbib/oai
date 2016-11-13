@@ -1,6 +1,5 @@
 package org.xbib.oai.server;
 
-import org.xbib.oai.OAISession;
 import org.xbib.oai.exceptions.OAIException;
 import org.xbib.oai.server.getrecord.GetRecordServerRequest;
 import org.xbib.oai.server.getrecord.GetRecordServerResponse;
@@ -100,11 +99,6 @@ public class PropertiesOAIServer implements OAIServer {
     @Override
     public String getGranularity() {
         return properties.getProperty(GRANULARITY);
-    }
-
-    @Override
-    public OAISession newSession() {
-        return null;
     }
 
     @Override

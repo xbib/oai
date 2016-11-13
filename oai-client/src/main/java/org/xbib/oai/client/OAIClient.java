@@ -6,7 +6,6 @@ import java.net.URL;
 import org.xbib.helianthus.client.ClientFactory;
 import org.xbib.helianthus.client.http.HttpClient;
 import org.xbib.oai.OAIConstants;
-import org.xbib.oai.OAISession;
 import org.xbib.oai.client.getrecord.GetRecordRequest;
 import org.xbib.oai.client.identify.IdentifyRequest;
 import org.xbib.oai.client.listidentifiers.ListIdentifiersRequest;
@@ -19,7 +18,7 @@ import org.xbib.oai.util.ResumptionToken;
  * OAI client API
  *
  */
-public interface OAIClient extends OAISession, OAIConstants {
+public interface OAIClient extends OAIConstants, AutoCloseable {
 
     OAIClient setURL(URL uri, boolean trustAlways) throws URISyntaxException;
 

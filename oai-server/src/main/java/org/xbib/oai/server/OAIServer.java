@@ -1,6 +1,5 @@
 package org.xbib.oai.server;
 
-import org.xbib.oai.OAISession;
 import org.xbib.oai.exceptions.OAIException;
 import org.xbib.oai.server.getrecord.GetRecordServerRequest;
 import org.xbib.oai.server.getrecord.GetRecordServerResponse;
@@ -15,7 +14,6 @@ import org.xbib.oai.server.listrecords.ListRecordsServerResponse;
 import org.xbib.oai.server.listsets.ListSetsServerRequest;
 import org.xbib.oai.server.listsets.ListSetsServerResponse;
 
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 
@@ -25,8 +23,6 @@ import java.util.Date;
 public interface OAIServer {
 
     URL getURL();
-
-    OAISession newSession() throws URISyntaxException;
 
     /**
      * This verb is used to retrieve information about a repository. 

@@ -28,7 +28,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.assertTrue;
@@ -106,7 +105,7 @@ public class DOAJClientTest {
             File file = File.createTempFile("doaj.", ".xml");
             file.deleteOnExit();
             FileWriter fileWriter = new FileWriter(file);
-            do {
+            while (listRecordsRequest != null) {
                 try {
                     listRecordsRequest.addHandler(simpleMetadataHandler);
                     client = oaiClient.getHttpClient();
@@ -128,7 +127,7 @@ public class DOAJClientTest {
                     logger.error(e.getMessage(), e);
                     listRecordsRequest = null;
                 }
-            } while (listRecordsRequest != null);
+            }
             fileWriter.close();
             oaiClient.close();
             logger.info("count={}", count.get());

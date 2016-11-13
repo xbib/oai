@@ -1,6 +1,5 @@
 package org.xbib.oai.server;
 
-import org.xbib.oai.OAISession;
 import org.xbib.oai.exceptions.OAIException;
 import org.xbib.oai.server.getrecord.GetRecordServerRequest;
 import org.xbib.oai.server.getrecord.GetRecordServerResponse;
@@ -64,12 +63,6 @@ public class SimpleServer implements OAIServer {
         } catch (MalformedURLException e) {
             //
         }
-        return null;
-    }
-
-    @Override
-    public OAISession newSession() throws URISyntaxException {
-        //return new DefaultOAIClient().setURL(getURL());
         return null;
     }
 
