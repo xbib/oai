@@ -1,11 +1,7 @@
 package org.xbib.oai.client;
 
-import java.net.URISyntaxException;
-import java.net.URL;
-
 import org.xbib.helianthus.client.ClientFactory;
 import org.xbib.helianthus.client.http.HttpClient;
-import org.xbib.oai.OAIConstants;
 import org.xbib.oai.client.getrecord.GetRecordRequest;
 import org.xbib.oai.client.identify.IdentifyRequest;
 import org.xbib.oai.client.listidentifiers.ListIdentifiersRequest;
@@ -14,15 +10,18 @@ import org.xbib.oai.client.listrecords.ListRecordsRequest;
 import org.xbib.oai.client.listsets.ListSetsRequest;
 import org.xbib.oai.util.ResumptionToken;
 
+import java.net.URISyntaxException;
+import java.net.URL;
+
 /**
- * OAI client API
+ * OAI client API.
  *
  */
-public interface OAIClient extends OAIConstants, AutoCloseable {
+public interface OAIClientMethods {
 
-    OAIClient setURL(URL uri, boolean trustAlways) throws URISyntaxException;
+    OAIClientMethods setURL(URL uri, boolean trustAlways) throws URISyntaxException;
 
-    OAIClient setURL(URL uri) throws URISyntaxException;
+    OAIClientMethods setURL(URL uri) throws URISyntaxException;
 
     URL getURL();
 

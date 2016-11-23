@@ -1,13 +1,6 @@
 package org.xbib.oai.client;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.URL;
-import java.time.Instant;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicLong;
+import static org.junit.Assert.assertEquals;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,7 +17,14 @@ import org.xbib.oai.xml.SimpleMetadataHandler;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import static org.junit.Assert.assertEquals;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.URL;
+import java.time.Instant;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  *
@@ -35,7 +35,7 @@ public class DNBClientTest {
 
     @Test
     public void testIdentify() throws Exception {
-        OAIClient client = new DefaultOAIClient().setURL(new URL("http://services.dnb.de/oai/repository"));
+        DefaultOAIClient client = new DefaultOAIClient().setURL(new URL("http://services.dnb.de/oai/repository"));
         IdentifyRequest request = client.newIdentifyRequest();
         HttpClient httpClient = client.getHttpClient();
         assertEquals("/oai/repository?verb=Identify", request.getPath());
@@ -45,8 +45,7 @@ public class DNBClientTest {
 
     @Test
     public void testListRecordsDNB() throws Exception {
-        try {
-            OAIClient client = new DefaultOAIClient().setURL(new URL("http://services.dnb.de/oai/repository"));
+        try (DefaultOAIClient client = new DefaultOAIClient().setURL(new URL("http://services.dnb.de/oai/repository"))){
             ListRecordsRequest listRecordsRequest = client.newListRecordsRequest();
             listRecordsRequest.setFrom(Instant.parse("2016-01-01T00:00:00Z"));
             listRecordsRequest.setUntil(Instant.parse("2016-01-10T00:00:00Z"));
@@ -105,7 +104,6 @@ public class DNBClientTest {
                 }
             }
             sw.close();
-            client.close();
             logger.info("count={}", count.get());
         } catch (ConnectException | ExecutionException e) {
             logger.warn("skipped, can not connect");

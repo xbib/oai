@@ -15,7 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Client OAI request
+ * Client OAI request.
  */
 public class ClientOAIRequest implements OAIRequest {
 

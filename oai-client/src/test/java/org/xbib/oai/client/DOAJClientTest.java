@@ -41,9 +41,8 @@ public class DOAJClientTest {
 
     @Test
     public void testListRecordsDOAJ() throws Exception {
-        try {
-            // will redirect to https://doaj.org/oai
-            OAIClient oaiClient = new DefaultOAIClient().setURL(new URL("http://doaj.org/oai"), true);
+        // will redirect to https://doaj.org/oai
+        try (DefaultOAIClient oaiClient = new DefaultOAIClient().setURL(new URL("http://doaj.org/oai"), true)) {
             IdentifyRequest identifyRequest = oaiClient.newIdentifyRequest();
             HttpClient client = oaiClient.getHttpClient();
             AggregatedHttpMessage response = client.execute(HttpHeaders.of(HttpMethod.GET, identifyRequest.getPath())
@@ -129,7 +128,6 @@ public class DOAJClientTest {
                 }
             }
             fileWriter.close();
-            oaiClient.close();
             logger.info("count={}", count.get());
             assertTrue(count.get() > 0L);
         } catch (ConnectException | ExecutionException e) {

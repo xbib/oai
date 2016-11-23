@@ -1,10 +1,5 @@
 package org.xbib.oai.client;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.time.Duration;
-
 import org.xbib.helianthus.client.ClientBuilder;
 import org.xbib.helianthus.client.ClientFactory;
 import org.xbib.helianthus.client.http.HttpClient;
@@ -16,10 +11,14 @@ import org.xbib.oai.client.listrecords.ListRecordsRequest;
 import org.xbib.oai.client.listsets.ListSetsRequest;
 import org.xbib.oai.util.ResumptionToken;
 
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.time.Duration;
+
 /**
- * Default OAI client
+ * Default OAI client.
  */
-public class DefaultOAIClient implements OAIClient {
+public class DefaultOAIClient implements OAIClientMethods, AutoCloseable {
 
     private HttpClient client;
 
@@ -185,7 +184,7 @@ public class DefaultOAIClient implements OAIClient {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         // nothing to close
     }
 }

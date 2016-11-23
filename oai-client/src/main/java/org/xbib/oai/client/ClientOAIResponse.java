@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Default OAI response
+ * Default OAI response.
  */
 public interface ClientOAIResponse extends OAIResponse {
 

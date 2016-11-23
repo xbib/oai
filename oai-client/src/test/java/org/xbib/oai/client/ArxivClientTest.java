@@ -39,8 +39,7 @@ public class ArxivClientTest {
 
     @Test
     public void testListRecordsArxiv() throws Exception {
-        try {
-            OAIClient client = new DefaultOAIClient().setURL(new URL("http://export.arxiv.org/oai2"));
+        try (DefaultOAIClient client = new DefaultOAIClient().setURL(new URL("http://export.arxiv.org/oai2"))) {
             IdentifyRequest identifyRequest = client.newIdentifyRequest();
             HttpClient httpClient = client.getHttpClient();
             AggregatedHttpMessage response = httpClient.execute(HttpHeaders.of(HttpMethod.GET, identifyRequest.getPath())
@@ -113,7 +112,6 @@ public class ArxivClientTest {
                 }
             }
             fileWriter.close();
-            client.close();
             logger.info("count={}", count.get());
             assertTrue(count.get() > 0L);
         } catch (ConnectException | ExecutionException e) {

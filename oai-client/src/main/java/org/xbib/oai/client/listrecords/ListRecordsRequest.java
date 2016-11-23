@@ -1,7 +1,7 @@
 package org.xbib.oai.client.listrecords;
 
-import org.xbib.oai.client.ClientOAIRequest;
 import org.xbib.oai.OAIConstants;
+import org.xbib.oai.client.ClientOAIRequest;
 import org.xbib.oai.xml.MetadataHandler;
 
 import java.util.LinkedList;
@@ -23,6 +23,8 @@ public class ListRecordsRequest extends ClientOAIRequest {
         return this;
     }
 
-    public List<MetadataHandler> getHandlers() { return handlers; }
+    public List<MetadataHandler> getHandlers() {
+        return handlers;
+    }
 
 }
