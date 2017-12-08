@@ -1,18 +1,17 @@
 package org.xbib.oai.client.getrecord;
 
 import org.xbib.helianthus.common.http.AggregatedHttpMessage;
-import org.xbib.oai.client.ClientOAIResponse;
+import org.xbib.oai.client.AbstractOAIResponse;
 
-import java.io.IOException;
 import java.io.Writer;
 
 /**
  *
  */
-public class GetRecordResponse implements ClientOAIResponse {
+public class GetRecordResponse extends AbstractOAIResponse {
 
     @Override
-    public void receivedResponse(AggregatedHttpMessage message, Writer writer) throws IOException {
+    public void receivedResponse(AggregatedHttpMessage message, Writer writer) {
         // not implemented yet
     }
 }

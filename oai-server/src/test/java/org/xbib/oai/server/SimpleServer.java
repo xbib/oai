@@ -16,7 +16,6 @@ import org.xbib.oai.server.listsets.ListSetsServerResponse;
 import org.xbib.oai.server.verb.Identify;
 
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 

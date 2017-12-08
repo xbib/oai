@@ -1,7 +1,7 @@
 package org.xbib.oai.client.listidentifiers;
 
 import org.xbib.helianthus.common.http.AggregatedHttpMessage;
-import org.xbib.oai.client.ClientOAIResponse;
+import org.xbib.oai.client.AbstractOAIResponse;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -9,7 +9,7 @@ import java.io.Writer;
 /**
  *
  */
-public class ListIdentifiersResponse implements ClientOAIResponse {
+public class ListIdentifiersResponse extends AbstractOAIResponse {
 
     @Override
     public void receivedResponse(AggregatedHttpMessage message, Writer writer) throws IOException {

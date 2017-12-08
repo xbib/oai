@@ -4,30 +4,18 @@ configurations {
 
 dependencies {
     compile project(':oai-common')
-    compile "org.xbib.helianthus:helianthus-client:1.0.3"
-    if ('os x' == org.gradle.internal.os.OperatingSystem.current().getFamilyName()) {
-        testCompile "io.netty:netty-tcnative:${versions.tcnative}:osx-x86_64"
-    }
-    if ('linux' == org.gradle.internal.os.OperatingSystem.current().getFamilyName()) {
-        if (new File("/etc/redhat-release").exists()) {
-            // use this for linking to libssl.so.10 (RHEL/Fedora/CentOS)
-            testCompile "io.netty:netty-tcnative:${versions.tcnative}:linux-x86_64-fedora"
-        } else {
-            // use this for linking to libssl.so.1.0.0
-            testCompile "io.netty:netty-tcnative:${versions.tcnative}:linux-x86_64"
-        }
-    }
-    alpnboot "org.mortbay.jetty.alpn:alpn-boot:${versions.alpnboot}"
+    compile "org.xbib:marc:${project.property('xbib-marc.version')}"
+    compile "org.xbib.helianthus:helianthus-client:${project.property('helianthus.version')}"
+    compile "io.netty:netty-tcnative-boringssl-static:${project.property('tcnative.version')}"
+    testCompile "org.xbib:bibliographic-character-sets:${project.property('xbib-bibliographic-character-sets.version')}"
+    alpnagent "org.mortbay.jetty.alpn:jetty-alpn-agent:${project.property('alpnagent.version')}"
 }
 
-
 test {
+    jvmArgs "-javaagent:" + configurations.alpnagent.asPath
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
     }
-    // note: bootstrapClasspath does not use /p (or /a)
-    jvmArgs "-Xbootclasspath/p:" + configurations.alpnboot.asPath
     systemProperty 'java.util.logging.manager', 'org.apache.logging.log4j.jul.LogManager'
-    systemProperty 'io.netty.leakDetection.level', 'advanced'
 }

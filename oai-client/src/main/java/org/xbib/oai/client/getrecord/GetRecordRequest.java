@@ -1,11 +1,11 @@
 package org.xbib.oai.client.getrecord;
 
-import org.xbib.oai.client.ClientOAIRequest;
+import org.xbib.oai.client.AbstractOAIRequest;
 
 /**
  *
  */
-public class GetRecordRequest extends ClientOAIRequest {
+public class GetRecordRequest extends AbstractOAIRequest {
 
     public GetRecordRequest() {
         super();

@@ -16,9 +16,9 @@ import java.net.URL;
 import java.time.Duration;
 
 /**
- * Default OAI client.
+ * OAI client.
  */
-public class DefaultOAIClient implements OAIClientMethods, AutoCloseable {
+public class OAIClient implements AutoCloseable {
 
     private HttpClient client;
 
@@ -26,13 +26,11 @@ public class DefaultOAIClient implements OAIClientMethods, AutoCloseable {
 
     private URL url;
 
-    @Override
-    public DefaultOAIClient setURL(URL url) throws URISyntaxException {
+    public OAIClient setURL(URL url) throws URISyntaxException {
         return setURL(url, false);
     }
 
-    @Override
-    public DefaultOAIClient setURL(URL url, boolean trustAlways) throws URISyntaxException {
+    public OAIClient setURL(URL url, boolean trustAlways) throws URISyntaxException {
         this.url = url;
         this.clientFactory = ClientFactory.DEFAULT;
         this.client = new ClientBuilder("none+" + url.toURI())
@@ -42,64 +40,103 @@ public class DefaultOAIClient implements OAIClientMethods, AutoCloseable {
         return this;
     }
 
-    @Override
     public URL getURL() {
         return url;
     }
 
-    @Override
     public HttpClient getHttpClient() {
         return client;
     }
 
-    @Override
     public ClientFactory getFactory() {
         return clientFactory;
     }
 
-    @Override
+    /**
+     * This verb is used to retrieve information about a repository.
+     * Some of the information returned is required as part of the OAI-PMH.
+     * Repositories may also employ the Identify verb to return additional
+     * descriptive information.
+     * @return identify request
+     */
     public IdentifyRequest newIdentifyRequest() {
         IdentifyRequest request = new IdentifyRequest();
         request.setURL(url);
         return request;
     }
 
-    @Override
+    /**
+     * This verb is used to retrieve the metadata formats available
+     * from a repository. An optional argument restricts the request
+     * to the formats available for a specific item.
+     * @return list metadata formats request
+     */
     public ListMetadataFormatsRequest newListMetadataFormatsRequest() {
         ListMetadataFormatsRequest request = new ListMetadataFormatsRequest();
         request.setURL(getURL());
         return request;
     }
 
-    @Override
+    /**
+     * This verb is used to retrieve the set structure of a repository,
+     * useful for selective harvesting.
+     * @return list sets request
+     */
     public ListSetsRequest newListSetsRequest() {
         ListSetsRequest request = new ListSetsRequest();
         request.setURL(getURL());
         return request;
     }
 
-    @Override
+    /**
+     * This verb is an abbreviated form of ListRecords, retrieving only
+     * headers rather than records. Optional arguments permit selective
+     * harvesting of headers based on set membership and/or datestamp.
+     * Depending on the repository's support for deletions, a returned
+     * header may have a status attribute of "deleted" if a record
+     * matching the arguments specified in the request has been deleted.
+     * @return list identifiers request
+     *
+     */
     public ListIdentifiersRequest newListIdentifiersRequest() {
         ListIdentifiersRequest request = new ListIdentifiersRequest();
         request.setURL(getURL());
         return request;
     }
 
-    @Override
+    /**
+     * This verb is used to retrieve an individual metadata record from
+     * a repository. Required arguments specify the identifier of the item
+     * from which the record is requested and the format of the metadata
+     * that should be included in the record. Depending on the level at
+     * which a repository tracks deletions, a header with a "deleted" value
+     * for the status attribute may be returned, in case the metadata format
+     * specified by the metadataPrefix is no longer available from the
+     * repository or from the specified item.
+     * @return get record request
+     */
     public GetRecordRequest newGetRecordRequest() {
         GetRecordRequest request = new GetRecordRequest();
         request.setURL(getURL());
         return request;
     }
 
-    @Override
+    /**
+     * This verb is used to harvest records from a repository.
+     * Optional arguments permit selective harvesting of records based on
+     * set membership and/or datestamp. Depending on the repository's
+     * support for deletions, a returned header may have a status
+     * attribute of "deleted" if a record matching the arguments
+     * specified in the request has been deleted. No metadata
+     * will be present for records with deleted status.
+     * @return list records request
+     */
     public ListRecordsRequest newListRecordsRequest() {
         ListRecordsRequest request = new ListRecordsRequest();
         request.setURL(getURL());
         return request;
     }
 
-    @Override
     public IdentifyRequest resume(IdentifyRequest request, ResumptionToken<?> token) {
         if (request.isRetry()) {
             request.setRetry(false);
@@ -113,7 +150,6 @@ public class DefaultOAIClient implements OAIClientMethods, AutoCloseable {
         return nextRequest;
     }
 
-    @Override
     public ListRecordsRequest resume(ListRecordsRequest request, ResumptionToken<?> token) {
         if (request.isRetry()) {
             request.setRetry(false);
@@ -127,7 +163,6 @@ public class DefaultOAIClient implements OAIClientMethods, AutoCloseable {
         return nextRequest;
     }
 
-    @Override
     public ListIdentifiersRequest resume(ListIdentifiersRequest request, ResumptionToken<?> token) {
         if (request.isRetry()) {
             request.setRetry(false);
@@ -141,7 +176,6 @@ public class DefaultOAIClient implements OAIClientMethods, AutoCloseable {
         return nextRequest;
     }
 
-    @Override
     public ListMetadataFormatsRequest resume(ListMetadataFormatsRequest request, ResumptionToken<?> token) {
         if (request.isRetry()) {
             request.setRetry(false);
@@ -155,7 +189,6 @@ public class DefaultOAIClient implements OAIClientMethods, AutoCloseable {
         return nextRequest;
     }
 
-    @Override
     public ListSetsRequest resume(ListSetsRequest request, ResumptionToken<?> token) {
         if (request.isRetry()) {
             request.setRetry(false);
@@ -169,7 +202,6 @@ public class DefaultOAIClient implements OAIClientMethods, AutoCloseable {
         return nextRequest;
     }
 
-    @Override
     public GetRecordRequest resume(GetRecordRequest request, ResumptionToken<?> token) {
         if (request.isRetry()) {
             request.setRetry(false);

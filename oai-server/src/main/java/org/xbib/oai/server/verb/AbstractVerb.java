@@ -3,10 +3,9 @@ package org.xbib.oai.server.verb;
 import org.xbib.oai.OAIConstants;
 import org.xbib.oai.exceptions.OAIException;
 import org.xbib.oai.server.OAIServer;
-import org.xbib.oai.server.ServerOAIRequest;
-import org.xbib.oai.server.ServerOAIResponse;
+import org.xbib.oai.server.AbstractOAIRequest;
+import org.xbib.oai.server.AbstractOAIResponse;
 
-import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,22 +28,22 @@ public abstract class AbstractVerb {
 
     private static final String NS_PREFIX = "xsi";
 
-    private final ServerOAIRequest request;
+    private final AbstractOAIRequest request;
 
-    private final ServerOAIResponse response;
+    private final AbstractOAIResponse response;
 
-    public AbstractVerb(ServerOAIRequest request, ServerOAIResponse response) {
+    public AbstractVerb(AbstractOAIRequest request, AbstractOAIResponse response) {
         this.request = request;
         this.response = response;
     }
 
-    public abstract void execute(OAIServer adapter) throws OAIException;
+    public abstract void execute(OAIServer server) throws OAIException;
     
     protected void beginDocument() throws XMLStreamException {
         response.getConsumer().add(eventFactory.createStartDocument());
     }
     
-    protected void endDocument() throws XMLStreamException, IOException {
+    protected void endDocument() throws XMLStreamException {
         response.getConsumer().add(eventFactory.createEndDocument());
     }
     

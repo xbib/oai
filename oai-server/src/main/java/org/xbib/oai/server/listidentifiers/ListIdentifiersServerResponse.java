@@ -1,10 +1,10 @@
 package org.xbib.oai.server.listidentifiers;
 
-import org.xbib.oai.server.ServerOAIResponse;
+import org.xbib.oai.server.AbstractOAIResponse;
 
 /**
  *
  */
-public class ListIdentifiersServerResponse extends ServerOAIResponse {
+public class ListIdentifiersServerResponse extends AbstractOAIResponse {
 
 }

@@ -9,7 +9,7 @@ import java.io.Writer;
 /**
  * Default OAI response.
  */
-public interface ClientOAIResponse extends OAIResponse {
+public abstract class AbstractOAIResponse implements OAIResponse {
 
-    void receivedResponse(AggregatedHttpMessage message, Writer writer) throws IOException;
+    public abstract void receivedResponse(AggregatedHttpMessage message, Writer writer) throws IOException;
 }

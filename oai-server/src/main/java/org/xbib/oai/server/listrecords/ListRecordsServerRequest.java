@@ -1,10 +1,10 @@
 package org.xbib.oai.server.listrecords;
 
-import org.xbib.oai.server.ServerOAIRequest;
+import org.xbib.oai.server.AbstractOAIRequest;
 
 /**
  *
  */
-public class ListRecordsServerRequest extends ServerOAIRequest {
+public class ListRecordsServerRequest extends AbstractOAIRequest {
 
 }

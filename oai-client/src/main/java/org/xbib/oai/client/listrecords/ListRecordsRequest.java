@@ -1,7 +1,7 @@
 package org.xbib.oai.client.listrecords;
 
 import org.xbib.oai.OAIConstants;
-import org.xbib.oai.client.ClientOAIRequest;
+import org.xbib.oai.client.AbstractOAIRequest;
 import org.xbib.oai.xml.MetadataHandler;
 
 import java.util.LinkedList;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  *
  */
-public class ListRecordsRequest extends ClientOAIRequest {
+public class ListRecordsRequest extends AbstractOAIRequest {
 
     private List<MetadataHandler> handlers = new LinkedList<>();
 

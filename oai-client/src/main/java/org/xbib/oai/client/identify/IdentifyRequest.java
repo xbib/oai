@@ -1,12 +1,11 @@
 package org.xbib.oai.client.identify;
 
-import org.xbib.oai.OAIRequest;
-import org.xbib.oai.client.ClientOAIRequest;
+import org.xbib.oai.client.AbstractOAIRequest;
 
 /**
  *
  */
-public class IdentifyRequest extends ClientOAIRequest implements OAIRequest {
+public class IdentifyRequest extends AbstractOAIRequest {
 
     public IdentifyRequest() {
         super();

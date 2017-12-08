@@ -2,15 +2,15 @@ package org.xbib.oai.server.verb;
 
 import org.xbib.oai.exceptions.OAIException;
 import org.xbib.oai.server.OAIServer;
-import org.xbib.oai.server.ServerOAIRequest;
-import org.xbib.oai.server.ServerOAIResponse;
+import org.xbib.oai.server.AbstractOAIRequest;
+import org.xbib.oai.server.AbstractOAIResponse;
 
 /**
  *
  */
 public class ListMetadataFormats extends AbstractVerb {
 
-    public ListMetadataFormats(ServerOAIRequest request, ServerOAIResponse response) {
+    public ListMetadataFormats(AbstractOAIRequest request, AbstractOAIResponse response) {
         super(request, response);
     }
 

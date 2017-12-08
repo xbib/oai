@@ -7,11 +7,11 @@ import javax.xml.stream.util.XMLEventConsumer;
 /**
  * Default OAI response.
  */
-public class ServerOAIResponse implements OAIResponse {
+public abstract class AbstractOAIResponse implements OAIResponse {
 
     private XMLEventConsumer consumer;
 
-    public ServerOAIResponse setConsumer(XMLEventConsumer consumer) {
+    public AbstractOAIResponse setConsumer(XMLEventConsumer consumer) {
         this.consumer = consumer;
         return this;
     }

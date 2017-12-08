@@ -17,9 +17,9 @@ import java.util.logging.Logger;
 /**
  * Client OAI request.
  */
-public class ClientOAIRequest implements OAIRequest {
+public abstract class AbstractOAIRequest implements OAIRequest {
 
-    private static final Logger logger = Logger.getLogger(ClientOAIRequest.class.getName());
+    private static final Logger logger = Logger.getLogger(AbstractOAIRequest.class.getName());
 
     private URIBuilder uriBuilder;
 
@@ -37,7 +37,7 @@ public class ClientOAIRequest implements OAIRequest {
 
     private boolean retry;
 
-    protected ClientOAIRequest() {
+    protected AbstractOAIRequest() {
         uriBuilder = new URIBuilder();
     }
 
@@ -135,35 +135,35 @@ public class ClientOAIRequest implements OAIRequest {
         return retry;
     }
 
-    class GetRecord extends ClientOAIRequest {
+    class GetRecord extends AbstractOAIRequest {
 
         public GetRecord() {
             addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.GET_RECORD);
         }
     }
 
-    class Identify extends ClientOAIRequest {
+    class Identify extends AbstractOAIRequest {
 
         public Identify() {
             addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.IDENTIFY);
         }
     }
 
-    class ListIdentifiers extends ClientOAIRequest {
+    class ListIdentifiers extends AbstractOAIRequest {
 
         public ListIdentifiers() {
             addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.LIST_IDENTIFIERS);
         }
     }
 
-    class ListMetadataFormats extends ClientOAIRequest {
+    class ListMetadataFormats extends AbstractOAIRequest {
 
         public ListMetadataFormats() {
             addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.LIST_METADATA_FORMATS);
         }
     }
 
-    class ListRecordsRequest extends ClientOAIRequest {
+    class ListRecordsRequest extends AbstractOAIRequest {
 
         public ListRecordsRequest() {
             addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.LIST_RECORDS);
@@ -171,7 +171,7 @@ public class ClientOAIRequest implements OAIRequest {
 
     }
 
-    class ListSetsRequest extends ClientOAIRequest {
+    class ListSetsRequest extends AbstractOAIRequest {
 
         public ListSetsRequest() {
             addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.LIST_SETS);

@@ -5,7 +5,7 @@ import io.netty.util.AsciiString;
 import org.xbib.content.xml.transform.TransformerURIResolver;
 import org.xbib.content.xml.util.XMLUtil;
 import org.xbib.helianthus.common.http.AggregatedHttpMessage;
-import org.xbib.oai.client.ClientOAIResponse;
+import org.xbib.oai.client.AbstractOAIResponse;
 import org.xbib.oai.exceptions.BadArgumentException;
 import org.xbib.oai.exceptions.BadResumptionTokenException;
 import org.xbib.oai.exceptions.NoRecordsMatchException;
@@ -32,7 +32,7 @@ import javax.xml.transform.stream.StreamResult;
 /**
  *
  */
-public class ListRecordsResponse implements ClientOAIResponse {
+public class ListRecordsResponse extends AbstractOAIResponse {
 
     private static final Logger logger = Logger.getLogger(ListRecordsResponse.class.getName());
     private static final String[] RETRY_AFTER_HEADERS = {

@@ -1,13 +1,13 @@
 package org.xbib.oai.server.listrecords;
 
-import org.xbib.oai.server.ServerOAIResponse;
+import org.xbib.oai.server.AbstractOAIResponse;
 
 import java.util.Date;
 
 /**
  *
  */
-public class ListRecordsServerResponse extends ServerOAIResponse {
+public class ListRecordsServerResponse extends AbstractOAIResponse {
 
     private String error;
 

@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  *
  */
-public abstract class ServerOAIRequest implements OAIRequest {
+public abstract class AbstractOAIRequest implements OAIRequest {
 
     private String path;
 
@@ -29,7 +29,7 @@ public abstract class ServerOAIRequest implements OAIRequest {
 
     private boolean retry;
 
-    protected ServerOAIRequest() {
+    protected AbstractOAIRequest() {
         this.parameters = new HashMap<>();
     }
 

@@ -4,7 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xbib.helianthus.common.http.AggregatedHttpMessage;
-import org.xbib.oai.client.ClientOAIResponse;
+import org.xbib.oai.client.AbstractOAIResponse;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -22,7 +22,7 @@ import javax.xml.parsers.ParserConfigurationException;
 /**
  *
  */
-public class IdentifyResponse implements ClientOAIResponse {
+public class IdentifyResponse extends AbstractOAIResponse {
 
     private String repositoryName;
 

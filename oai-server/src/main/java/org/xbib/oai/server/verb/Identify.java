@@ -15,10 +15,10 @@ public class Identify extends AbstractVerb {
     }
 
     @Override
-    public void execute(OAIServer adapter) throws OAIException {
+    public void execute(OAIServer server) throws OAIException {
         try {
             beginDocument();
-            beginOAIPMH(adapter.getBaseURL());            
+            beginOAIPMH(server.getBaseURL());
             beginElement("Identify");
             endElement("Identify");
             endOAIPMH();

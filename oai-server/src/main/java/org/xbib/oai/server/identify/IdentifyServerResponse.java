@@ -1,6 +1,6 @@
 package org.xbib.oai.server.identify;
 
-import org.xbib.oai.server.ServerOAIResponse;
+import org.xbib.oai.server.AbstractOAIResponse;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  *
  */
-public class IdentifyServerResponse extends ServerOAIResponse {
+public class IdentifyServerResponse extends AbstractOAIResponse {
 
     private String repositoryName;
 
