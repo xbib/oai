@@ -1,9 +1,9 @@
 package org.xbib.oai.server.verb;
 
 import org.xbib.oai.exceptions.OAIException;
-import org.xbib.oai.server.OAIServer;
 import org.xbib.oai.server.AbstractOAIRequest;
 import org.xbib.oai.server.AbstractOAIResponse;
+import org.xbib.oai.server.OAIServer;
 
 /**
  *

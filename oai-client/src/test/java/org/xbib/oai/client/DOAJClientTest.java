@@ -38,6 +38,7 @@ public class DOAJClientTest {
     private static final Logger logger = LogManager.getLogger(DOAJClientTest.class.getName());
 
     @Test
+    @Ignore // takes too long time
     public void testListRecordsDOAJ() throws Exception {
         // will redirect to https://doaj.org/oai
         try (OAIClient oaiClient = new OAIClient().setURL(new URL("http://doaj.org/oai"), true)) {

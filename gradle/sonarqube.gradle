@@ -1,8 +1,8 @@
 tasks.withType(FindBugs) {
     ignoreFailures = true
     reports {
-        xml.enabled = true
-        html.enabled = false
+        xml.enabled = false
+        html.enabled = true
     }
 }
 tasks.withType(Pmd) {

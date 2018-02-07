@@ -1,12 +1,13 @@
 
 task xbibUpload(type: Upload, dependsOn: build) {
+    group = 'publish'
     configuration = configurations.archives
     uploadDescriptor = true
     repositories {
         if (project.hasProperty('xbibUsername')) {
             mavenDeployer {
                 configuration = configurations.wagon
-                repository(url: uri('scpexe://xbib.org/repository')) {
+                repository(url: uri(project.property('xbibUrl'))) {
                         authentication(userName: xbibUsername, privateKey: xbibPrivateKey)
                 }
             }
@@ -15,6 +16,7 @@ task xbibUpload(type: Upload, dependsOn: build) {
 }
 
 task sonatypeUpload(type: Upload, dependsOn: build) {
+    group = 'publish'
     configuration = configurations.archives
     uploadDescriptor = true
     repositories {
@@ -63,4 +65,8 @@ task sonatypeUpload(type: Upload, dependsOn: build) {
             }
         }
     }
+}
+
+nexusStaging {
+    packageGroup = "org.xbib"
 }

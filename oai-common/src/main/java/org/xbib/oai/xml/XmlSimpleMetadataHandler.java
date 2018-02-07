@@ -9,7 +9,6 @@ import java.io.Writer;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,7 +37,7 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
 
     private List<String> namespaces = new ArrayList<>();
 
-    private Deque<Collection<?>> nsStack = new ArrayDeque<>();
+    private Deque<Collection<Namespace>> nsStack = new ArrayDeque<>();
 
     private Locator locator;
 
@@ -92,7 +91,7 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
     }
 
     @Override
-    public void startDocument() throws SAXException {
+    public void startDocument() {
         if (eventWriter == null) {
             return;
         }
@@ -119,7 +118,7 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
     }
 
     @Override
-    public void startPrefixMapping(String prefix, String namespaceURI) throws SAXException {
+    public void startPrefixMapping(String prefix, String namespaceURI) {
         if (eventWriter == null) {
             return;
         }
@@ -138,7 +137,7 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
     }
 
     @Override
-    public void endPrefixMapping(String string) throws SAXException {
+    public void endPrefixMapping(String string) {
         // not used
     }
 
@@ -155,15 +154,16 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
             }
             needToCallStartDocument = false;
         }
-        Collection<?>[] events = {null, null};
-        createStartEvents(attributes, events);
-        nsStack.add(events[0]);
+        Collection<Attribute> attr = new ArrayList<>();
+        Collection<Namespace> ns = new ArrayList<>();
+        createStartEvents(attributes, attr, ns);
+        nsStack.add(ns);
         try {
             String[] q = {null, null};
             parseQName(qname, q);
             eventFactory.setLocation(getCurrentLocation());
             eventWriter.add(eventFactory.createStartElement(q[0], uri,
-                    q[1], events[1].iterator(), events[0].iterator()));
+                    q[1], attr.iterator(), ns.iterator()));
         } catch (XMLStreamException e) {
             throw new SAXException(e);
         }
@@ -176,8 +176,7 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
         }
         String[] q = {null, null};
         parseQName(qname, q);
-        Collection<?> nsList = nsStack.getLast();
-        Iterator<?> nsIter = nsList.iterator();
+        Iterator<Namespace> nsIter = nsStack.getLast().iterator();
         try {
             eventFactory.setLocation(getCurrentLocation());
             eventWriter.add(eventFactory.createEndElement(q[0], uri, q[1], nsIter));
@@ -199,7 +198,7 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
         }
     }
 
-    private void createStartEvents(Attributes attributes, Collection<?>[] events) {
+    private void createStartEvents(Attributes attributes, Collection<Attribute> attrList, Collection<Namespace> nsList) {
         Map<String, Namespace> nsMap = null;
         List<Attribute> attrs = null;
         if (namespaces != null) {
@@ -241,8 +240,12 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
                 attrs.add(attribute);
             }
         }
-        events[0] = nsMap == null ? Collections.emptyList() : nsMap.values();
-        events[1] = attrs == null ? Collections.emptyList() : attrs;
+        if (nsMap != null) {
+            nsList.addAll(nsMap.values());
+        }
+        if (attrs != null) {
+            attrList.addAll(attrs);
+        }
     }
 
     private void parseQName(String qName, String[] results) {

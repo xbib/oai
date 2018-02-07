@@ -2,6 +2,7 @@ package org.xbib.oai.client;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xbib.helianthus.client.Clients;
 import org.xbib.helianthus.client.http.HttpClient;
@@ -37,6 +38,7 @@ public class BundeskunsthalleTest {
     private static final Logger logger = LogManager.getLogger(BundeskunsthalleTest.class.getName());
 
     @Test
+    @Ignore // takes too long time and creates files
     public void testListRecords() throws Exception {
         String spec = "http://www.bundeskunsthalle.de/cgi-bin/bib/oai-pmh";
         try (OAIClient oaiClient = new OAIClient().setURL(new URL(spec), true)) {
