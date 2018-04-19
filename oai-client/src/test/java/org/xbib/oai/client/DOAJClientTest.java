@@ -32,7 +32,6 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  *
  */
-@Ignore
 public class DOAJClientTest {
 
     private static final Logger logger = LogManager.getLogger(DOAJClientTest.class.getName());
@@ -64,21 +63,23 @@ public class DOAJClientTest {
                     DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.of("GMT")) : null;
             ListRecordsRequest listRecordsRequest = oaiClient.newListRecordsRequest();
             listRecordsRequest.setDateTimeFormatter(dateTimeFormatter);
-            listRecordsRequest.setFrom(Instant.parse("2017-01-01T00:00:00Z"));
+            listRecordsRequest.setFrom(Instant.parse("2008-01-01T00:00:00Z"));
             listRecordsRequest.setUntil(Instant.parse("2018-01-01T00:00:00Z"));
             listRecordsRequest.setMetadataPrefix("oai_dc");
             Handler handler = new Handler();
-            File file =  File.createTempFile("doaj.", ".xml");
+            File file = File.createTempFile("doaj.", ".xml");
             file.deleteOnExit();
             FileWriter fileWriter = new FileWriter(file);
+            ListRecordsResponse listRecordsResponse = null;
             while (listRecordsRequest != null) {
                 try {
-                    ListRecordsResponse listRecordsResponse = new ListRecordsResponse(listRecordsRequest);
+                    logger.debug("request = {}", listRecordsRequest);
+                    listRecordsResponse = new ListRecordsResponse(listRecordsRequest);
                     logger.debug("response = {}", response.headers());
                     listRecordsRequest.addHandler(handler);
                     client = oaiClient.getHttpClient();
                     response = client.execute(HttpHeaders.of(HttpMethod.GET, listRecordsRequest.getPath())
-                                    .set(HttpHeaderNames.ACCEPT, "utf-8")).aggregate().get();
+                            .set(HttpHeaderNames.ACCEPT, "utf-8")).aggregate().get();
                     // follow a maximum of 10 HTTP redirects
                     max = 10;
                     while (response.followUrl() != null && max-- > 0) {
@@ -88,6 +89,10 @@ public class DOAJClientTest {
                                 .set(HttpHeaderNames.ACCEPT, "utf-8")).aggregate().get();
                     }
                     listRecordsResponse.receivedResponse(response, fileWriter);
+                    listRecordsRequest = oaiClient.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
+                } catch (TooManyRequestsException e) {
+                    logger.error(e.getMessage(), e);
+                    Thread.sleep(10000L);
                     listRecordsRequest = oaiClient.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
                 } catch (IOException e) {
                     logger.error(e.getMessage(), e);

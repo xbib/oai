@@ -135,6 +135,15 @@ public abstract class AbstractOAIRequest implements OAIRequest {
         return retry;
     }
 
+    @Override
+    public String toString() {
+        return "[request:metadataPrefix=" + getMetadataPrefix()
+                + ",set=" + getSet()
+                + ",from=" + getFrom()
+                + ",until=" + getUntil()
+                + "]";
+    }
+
     class GetRecord extends AbstractOAIRequest {
 
         public GetRecord() {

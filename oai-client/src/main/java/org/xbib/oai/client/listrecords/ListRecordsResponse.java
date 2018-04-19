@@ -6,6 +6,7 @@ import org.xbib.content.xml.transform.TransformerURIResolver;
 import org.xbib.content.xml.util.XMLUtil;
 import org.xbib.helianthus.common.http.AggregatedHttpMessage;
 import org.xbib.oai.client.AbstractOAIResponse;
+import org.xbib.oai.client.TooManyRequestsException;
 import org.xbib.oai.exceptions.BadArgumentException;
 import org.xbib.oai.exceptions.BadResumptionTokenException;
 import org.xbib.oai.exceptions.NoRecordsMatchException;
@@ -108,6 +109,9 @@ public class ListRecordsResponse extends AbstractOAIResponse {
                 logger.log(Level.SEVERE, "interrupted");
             }
             return;
+        }
+        if (status == 429) {
+            throw new TooManyRequestsException();
         }
         if (status != 200) {
             throw new IOException("status  = " + status + " response = " + content);
