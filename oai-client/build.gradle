@@ -1,21 +1,8 @@
-configurations {
-    alpnboot
-}
 
 dependencies {
     compile project(':oai-common')
-    compile "org.xbib:marc:${project.property('xbib-marc.version')}"
-    compile "org.xbib.helianthus:helianthus-client:${project.property('helianthus.version')}"
-    compile "io.netty:netty-tcnative-boringssl-static:${project.property('tcnative.version')}"
+    compile "org.xbib:netty-http-client:${project.property('xbib-netty-http.version')}"
+    testCompile "io.netty:netty-tcnative-boringssl-static:${project.property('tcnative.version')}"
+    testCompile "org.xbib:marc:${project.property('xbib-marc.version')}"
     testCompile "org.xbib:bibliographic-character-sets:${project.property('xbib-bibliographic-character-sets.version')}"
-    alpnagent "org.mortbay.jetty.alpn:jetty-alpn-agent:${project.property('alpnagent.version')}"
-}
-
-test {
-    jvmArgs "-javaagent:" + configurations.alpnagent.asPath
-    testLogging {
-        showStandardStreams = true
-        exceptionFormat = 'full'
-    }
-    systemProperty 'java.util.logging.manager', 'org.apache.logging.log4j.jul.LogManager'
 }

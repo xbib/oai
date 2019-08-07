@@ -1,15 +1,11 @@
 package org.xbib.oai.client;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.xbib.helianthus.client.Clients;
-import org.xbib.helianthus.client.http.HttpClient;
-import org.xbib.helianthus.common.http.AggregatedHttpMessage;
-import org.xbib.helianthus.common.http.HttpHeaderNames;
-import org.xbib.helianthus.common.http.HttpHeaders;
-import org.xbib.helianthus.common.http.HttpMethod;
+import org.xbib.net.URL;
+import org.xbib.netty.http.client.Client;
+import org.xbib.netty.http.client.Request;
 import org.xbib.oai.client.identify.IdentifyRequest;
 import org.xbib.oai.client.identify.IdentifyResponse;
 import org.xbib.oai.client.listrecords.ListRecordsRequest;
@@ -18,47 +14,41 @@ import org.xbib.oai.xml.SimpleMetadataHandler;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.StringWriter;
-import java.net.ConnectException;
-import java.net.URI;
-import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  */
 public class DOAJClientTest {
 
-    private static final Logger logger = LogManager.getLogger(DOAJClientTest.class.getName());
+    private static final Logger logger = Logger.getLogger(DOAJClientTest.class.getName());
 
     @Test
     @Ignore // takes too long time
-    public void testListRecordsDOAJ() throws Exception {
-        // will redirect to https://doaj.org/oai
-        try (OAIClient oaiClient = new OAIClient().setURL(new URL("http://doaj.org/oai"), true)) {
+    public void testListRecordsDOAJ() {
+        URL url = URL.create("https://doaj.org/oai");
+        try (OAIClient oaiClient = new OAIClient(url)) {
             IdentifyRequest identifyRequest = oaiClient.newIdentifyRequest();
-            HttpClient client = oaiClient.getHttpClient();
-            AggregatedHttpMessage response = client.execute(HttpHeaders.of(HttpMethod.GET, identifyRequest.getPath())
-                            .set(HttpHeaderNames.ACCEPT, "utf-8")).aggregate().get();
-            // follow a maximum of 10 HTTP redirects
-            int max = 10;
-            while (response.followUrl() != null && max-- > 0) {
-                URI uri = URI.create(response.followUrl());
-                client = Clients.newClient(oaiClient.getFactory(), "none+" + uri, HttpClient.class);
-                response = client.execute(HttpHeaders.of(HttpMethod.GET, response.followUrl())
-                                .set(HttpHeaderNames.ACCEPT, "utf-8")).aggregate().get();
-            }
+            Client httpClient = oaiClient.getHttpClient();
             IdentifyResponse identifyResponse = new IdentifyResponse();
-            String content = response.content().toStringUtf8();
-            logger.debug("identifyResponse = {}", content);
-            identifyResponse.receivedResponse(response, new StringWriter());
+            Request request = Request.get()
+                    .url(url.resolve(identifyRequest.getURL()))
+                    .addHeader(HttpHeaderNames.ACCEPT.toString(), "utf-8")
+                    .build()
+                    .setResponseListener(resp -> {
+                        StringWriter sw = new StringWriter();
+                        identifyResponse.receivedResponse(resp, sw);
+                    });
+            httpClient.execute(request).get();
             String granularity = identifyResponse.getGranularity();
-            logger.info("granularity = {}", granularity);
+            logger.log(Level.INFO, "granularity = " + granularity);
+
             DateTimeFormatter dateTimeFormatter = "YYYY-MM-DD".equals(granularity) ?
                     DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.of("GMT")) : null;
             ListRecordsRequest listRecordsRequest = oaiClient.newListRecordsRequest();
@@ -70,56 +60,41 @@ public class DOAJClientTest {
             File file = File.createTempFile("doaj.", ".xml");
             file.deleteOnExit();
             FileWriter fileWriter = new FileWriter(file);
-            ListRecordsResponse listRecordsResponse = null;
             while (listRecordsRequest != null) {
-                try {
-                    logger.debug("request = {}", listRecordsRequest);
-                    listRecordsResponse = new ListRecordsResponse(listRecordsRequest);
-                    logger.debug("response = {}", response.headers());
-                    listRecordsRequest.addHandler(handler);
-                    client = oaiClient.getHttpClient();
-                    response = client.execute(HttpHeaders.of(HttpMethod.GET, listRecordsRequest.getPath())
-                            .set(HttpHeaderNames.ACCEPT, "utf-8")).aggregate().get();
-                    // follow a maximum of 10 HTTP redirects
-                    max = 10;
-                    while (response.followUrl() != null && max-- > 0) {
-                        URI uri = URI.create(response.followUrl());
-                        client = Clients.newClient(oaiClient.getFactory(), "none+" + uri, HttpClient.class);
-                        response = client.execute(HttpHeaders.of(HttpMethod.GET, response.followUrl())
-                                .set(HttpHeaderNames.ACCEPT, "utf-8")).aggregate().get();
-                    }
-                    listRecordsResponse.receivedResponse(response, fileWriter);
-                    listRecordsRequest = oaiClient.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
-                } catch (TooManyRequestsException e) {
-                    logger.error(e.getMessage(), e);
-                    Thread.sleep(10000L);
-                    listRecordsRequest = oaiClient.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
-                } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
-                    listRecordsRequest = null;
-                }
+                ListRecordsResponse listRecordsResponse = new ListRecordsResponse(listRecordsRequest);
+                listRecordsRequest.addHandler(handler);
+                logger.log(Level.INFO,"sending " + listRecordsRequest.getURL());
+                request = Request.get()
+                        .url(url.resolve(listRecordsRequest.getURL()))
+                        .addHeader(HttpHeaderNames.ACCEPT.toString(), "utf-8")
+                        .build()
+                        .setResponseListener(resp -> {
+                            listRecordsResponse.receivedResponse(resp, fileWriter);
+                            logger.log(Level.FINE, "response headers = " + resp.getHeaders() +
+                                    " resumption-token = {}" + listRecordsResponse.getResumptionToken());
+                        });
+                httpClient.execute(request).get();
+                listRecordsRequest = oaiClient.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
             }
             fileWriter.close();
-            logger.info("count={}", handler.count());
-        } catch (ConnectException | ExecutionException e) {
-            logger.warn("skipped, can not connect, exception is:", e);
-        } catch (InterruptedException | IOException e) {
-            throw e;
+            logger.log(Level.INFO, "count = " + handler.count());
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
         }
     }
 
-    class Handler extends SimpleMetadataHandler {
+    static class Handler extends SimpleMetadataHandler {
 
         final AtomicLong count = new AtomicLong(0L);
 
         @Override
         public void startDocument() {
-            logger.debug("start doc");
+            logger.log(Level.FINE, "start doc");
         }
 
         @Override
         public void endDocument() {
-            logger.debug("end doc");
+            logger.log(Level.FINE, "end doc");
             count.incrementAndGet();
         }
 

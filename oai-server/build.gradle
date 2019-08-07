@@ -1,4 +1,4 @@
 dependencies {
     compile project(':oai-common')
-    compile "org.xbib.helianthus:helianthus-server:${project.property('helianthus.version')}"
+
 }

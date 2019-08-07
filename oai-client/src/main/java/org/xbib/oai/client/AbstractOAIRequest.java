@@ -1,27 +1,19 @@
 package org.xbib.oai.client;
 
+import org.xbib.net.URL;
 import org.xbib.oai.OAIConstants;
 import org.xbib.oai.OAIRequest;
 import org.xbib.oai.util.ResumptionToken;
-import org.xbib.oai.util.URIBuilder;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Client OAI request.
  */
 public abstract class AbstractOAIRequest implements OAIRequest {
 
-    private static final Logger logger = Logger.getLogger(AbstractOAIRequest.class.getName());
-
-    private URIBuilder uriBuilder;
+    private final URL.Builder urlBuilder;
 
     private DateTimeFormatter dateTimeFormatter;
 
@@ -37,33 +29,22 @@ public abstract class AbstractOAIRequest implements OAIRequest {
 
     private boolean retry;
 
-    protected AbstractOAIRequest() {
-        uriBuilder = new URIBuilder();
+    protected AbstractOAIRequest(URL url) {
+        this.urlBuilder = URL.builder()
+                .scheme(url.getScheme())
+                .host(url.getHost())
+                .port(url.getPort())
+                .path(url.getPath());
+
     }
 
-    public void setURL(URL url) {
-        try {
-            URI uri = url.toURI();
-            uriBuilder.scheme(uri.getScheme())
-                    .authority(uri.getAuthority())
-                    .path(uri.getPath());
-        } catch (URISyntaxException e) {
-            logger.log(Level.WARNING, e.getMessage(), e);
-            throw new IllegalArgumentException("invalid URI " + url);
-        }
+    public URL getURL() {
+        return urlBuilder.build();
     }
 
-    public URL getURL() throws MalformedURLException {
-        return uriBuilder.build().toURL();
-    }
-
-    public String getPath() {
-        return uriBuilder.buildGetPath();
-    }
-
-    public void addParameter(String name, String value) {
+    protected void addParameter(String name, String value) {
         if (value != null && !value.isEmpty()) {
-            uriBuilder.addParameter(name, value);
+            urlBuilder.queryParam(name, value).build();
         }
     }
 
@@ -144,9 +125,10 @@ public abstract class AbstractOAIRequest implements OAIRequest {
                 + "]";
     }
 
-    class GetRecord extends AbstractOAIRequest {
+    /*class GetRecord extends AbstractOAIRequest {
 
         public GetRecord() {
+            super(url);
             addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.GET_RECORD);
         }
     }
@@ -154,6 +136,7 @@ public abstract class AbstractOAIRequest implements OAIRequest {
     class Identify extends AbstractOAIRequest {
 
         public Identify() {
+            super(url);
             addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.IDENTIFY);
         }
     }
@@ -161,6 +144,7 @@ public abstract class AbstractOAIRequest implements OAIRequest {
     class ListIdentifiers extends AbstractOAIRequest {
 
         public ListIdentifiers() {
+            super(url);
             addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.LIST_IDENTIFIERS);
         }
     }
@@ -168,6 +152,7 @@ public abstract class AbstractOAIRequest implements OAIRequest {
     class ListMetadataFormats extends AbstractOAIRequest {
 
         public ListMetadataFormats() {
+            super(url);
             addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.LIST_METADATA_FORMATS);
         }
     }
@@ -175,6 +160,7 @@ public abstract class AbstractOAIRequest implements OAIRequest {
     class ListRecordsRequest extends AbstractOAIRequest {
 
         public ListRecordsRequest() {
+            super(url);
             addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.LIST_RECORDS);
         }
 
@@ -183,7 +169,8 @@ public abstract class AbstractOAIRequest implements OAIRequest {
     class ListSetsRequest extends AbstractOAIRequest {
 
         public ListSetsRequest() {
+            super(url);
             addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.LIST_SETS);
         }
-    }
+    }*/
 }

@@ -1,9 +1,9 @@
 package org.xbib.oai.client;
 
-import org.xbib.helianthus.common.http.AggregatedHttpMessage;
+import org.xbib.netty.http.common.HttpResponse;
 import org.xbib.oai.OAIResponse;
+import org.xbib.oai.exceptions.OAIException;
 
-import java.io.IOException;
 import java.io.Writer;
 
 /**
@@ -11,5 +11,5 @@ import java.io.Writer;
  */
 public abstract class AbstractOAIResponse implements OAIResponse {
 
-    public abstract void receivedResponse(AggregatedHttpMessage message, Writer writer) throws IOException;
+    public abstract void receivedResponse(HttpResponse message, Writer writer) throws OAIException;
 }

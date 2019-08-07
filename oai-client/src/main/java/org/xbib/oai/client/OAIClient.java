@@ -1,8 +1,7 @@
 package org.xbib.oai.client;
 
-import org.xbib.helianthus.client.ClientBuilder;
-import org.xbib.helianthus.client.ClientFactory;
-import org.xbib.helianthus.client.http.HttpClient;
+import org.xbib.net.URL;
+import org.xbib.netty.http.client.Client;
 import org.xbib.oai.client.getrecord.GetRecordRequest;
 import org.xbib.oai.client.identify.IdentifyRequest;
 import org.xbib.oai.client.listidentifiers.ListIdentifiersRequest;
@@ -11,45 +10,29 @@ import org.xbib.oai.client.listrecords.ListRecordsRequest;
 import org.xbib.oai.client.listsets.ListSetsRequest;
 import org.xbib.oai.util.ResumptionToken;
 
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.time.Duration;
-
 /**
  * OAI client.
  */
 public class OAIClient implements AutoCloseable {
 
-    private HttpClient client;
+    private Client client;
 
-    private ClientFactory clientFactory;
+    private final URL url;
 
-    private URL url;
-
-    public OAIClient setURL(URL url) throws URISyntaxException {
-        return setURL(url, false);
-    }
-
-    public OAIClient setURL(URL url, boolean trustAlways) throws URISyntaxException {
+    public OAIClient(URL url) {
         this.url = url;
-        this.clientFactory = ClientFactory.DEFAULT;
-        this.client = new ClientBuilder("none+" + url.toURI())
-                .factory(clientFactory)
-                .defaultResponseTimeout(Duration.ofMinutes(1L)) // maybe not enough for extreme slow archive servers...
-                .build(HttpClient.class);
-        return this;
+        this.client = Client.builder()
+                .setConnectTimeoutMillis(60 * 1000)
+                .setReadTimeoutMillis(60 * 1000)
+                .build();
     }
 
     public URL getURL() {
         return url;
     }
 
-    public HttpClient getHttpClient() {
+    public Client getHttpClient() {
         return client;
-    }
-
-    public ClientFactory getFactory() {
-        return clientFactory;
     }
 
     /**
@@ -60,9 +43,7 @@ public class OAIClient implements AutoCloseable {
      * @return identify request
      */
     public IdentifyRequest newIdentifyRequest() {
-        IdentifyRequest request = new IdentifyRequest();
-        request.setURL(url);
-        return request;
+        return new IdentifyRequest(url);
     }
 
     /**
@@ -72,9 +53,7 @@ public class OAIClient implements AutoCloseable {
      * @return list metadata formats request
      */
     public ListMetadataFormatsRequest newListMetadataFormatsRequest() {
-        ListMetadataFormatsRequest request = new ListMetadataFormatsRequest();
-        request.setURL(getURL());
-        return request;
+        return new ListMetadataFormatsRequest(url);
     }
 
     /**
@@ -83,9 +62,7 @@ public class OAIClient implements AutoCloseable {
      * @return list sets request
      */
     public ListSetsRequest newListSetsRequest() {
-        ListSetsRequest request = new ListSetsRequest();
-        request.setURL(getURL());
-        return request;
+        return new ListSetsRequest(url);
     }
 
     /**
@@ -99,9 +76,7 @@ public class OAIClient implements AutoCloseable {
      *
      */
     public ListIdentifiersRequest newListIdentifiersRequest() {
-        ListIdentifiersRequest request = new ListIdentifiersRequest();
-        request.setURL(getURL());
-        return request;
+        return new ListIdentifiersRequest(url);
     }
 
     /**
@@ -116,9 +91,7 @@ public class OAIClient implements AutoCloseable {
      * @return get record request
      */
     public GetRecordRequest newGetRecordRequest() {
-        GetRecordRequest request = new GetRecordRequest();
-        request.setURL(getURL());
-        return request;
+        return new GetRecordRequest(url);
     }
 
     /**
@@ -132,9 +105,7 @@ public class OAIClient implements AutoCloseable {
      * @return list records request
      */
     public ListRecordsRequest newListRecordsRequest() {
-        ListRecordsRequest request = new ListRecordsRequest();
-        request.setURL(getURL());
-        return request;
+        return new ListRecordsRequest(url);
     }
 
     public IdentifyRequest resume(IdentifyRequest request, ResumptionToken<?> token) {

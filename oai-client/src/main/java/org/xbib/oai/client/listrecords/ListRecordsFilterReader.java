@@ -9,6 +9,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -155,19 +157,17 @@ public class ListRecordsFilterReader extends XMLFilterReader {
                         try {
                             header.setDate(Instant.parse(s));
                         } catch (DateTimeParseException e) {
-                            logger.log(Level.FINEST, e.getMessage(), e);
                             try {
                                 ZonedDateTime zonedDateTime = ZonedDateTime.parse(s,
                                         DateTimeFormatter.ISO_DATE_TIME);
                                 header.setDate(Instant.from(zonedDateTime));
                             } catch (DateTimeParseException e1) {
-                                logger.log(Level.FINEST, e1.getMessage(), e1);
                                 try {
-                                    ZonedDateTime zonedDateTime = ZonedDateTime.parse(s,
-                                            DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                    LocalDate localDate = LocalDate.parse(s, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                    ZonedDateTime zonedDateTime = localDate.atStartOfDay(ZoneId.of("UTC"));
                                     header.setDate(Instant.from(zonedDateTime));
                                 } catch (DateTimeParseException e2) {
-                                    logger.log(Level.FINEST, e2.getMessage(), e2);
+                                    logger.log(Level.WARNING, "unable to parse date: " + s + " reason = " + e2.getMessage());
                                 }
                             }
                         }

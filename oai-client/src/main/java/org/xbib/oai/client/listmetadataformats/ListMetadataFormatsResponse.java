@@ -1,9 +1,9 @@
 package org.xbib.oai.client.listmetadataformats;
 
-import org.xbib.helianthus.common.http.AggregatedHttpMessage;
+import org.xbib.netty.http.common.HttpResponse;
 import org.xbib.oai.client.AbstractOAIResponse;
+import org.xbib.oai.exceptions.OAIException;
 
-import java.io.IOException;
 import java.io.Writer;
 
 /**
@@ -12,7 +12,7 @@ import java.io.Writer;
 public class ListMetadataFormatsResponse extends AbstractOAIResponse {
 
     @Override
-    public void receivedResponse(AggregatedHttpMessage message, Writer writer) throws IOException {
+    public void receivedResponse(HttpResponse message, Writer writer) throws OAIException {
         // not implemented yet
     }
 }

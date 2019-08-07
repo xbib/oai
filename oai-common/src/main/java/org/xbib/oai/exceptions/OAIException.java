@@ -1,11 +1,9 @@
 package org.xbib.oai.exceptions;
 
-import java.io.IOException;
-
 /**
  *
  */
-public class OAIException extends IOException {
+public class OAIException extends RuntimeException {
 
     private static final long serialVersionUID = -1890146067179892744L;
 

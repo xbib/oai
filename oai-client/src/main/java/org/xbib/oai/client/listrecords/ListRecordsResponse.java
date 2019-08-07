@@ -1,12 +1,12 @@
 package org.xbib.oai.client.listrecords;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.util.AsciiString;
 import org.xbib.content.xml.transform.TransformerURIResolver;
 import org.xbib.content.xml.util.XMLUtil;
-import org.xbib.helianthus.common.http.AggregatedHttpMessage;
+import org.xbib.netty.http.common.HttpResponse;
 import org.xbib.oai.client.AbstractOAIResponse;
-import org.xbib.oai.client.TooManyRequestsException;
+import org.xbib.oai.exceptions.BadVerbException;
+import org.xbib.oai.exceptions.TooManyRequestsException;
 import org.xbib.oai.exceptions.BadArgumentException;
 import org.xbib.oai.exceptions.BadResumptionTokenException;
 import org.xbib.oai.exceptions.NoRecordsMatchException;
@@ -14,9 +14,9 @@ import org.xbib.oai.exceptions.OAIException;
 import org.xbib.oai.util.ResumptionToken;
 import org.xml.sax.InputSource;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -77,14 +77,14 @@ public class ListRecordsResponse extends AbstractOAIResponse {
     }
 
     @Override
-    public void receivedResponse(AggregatedHttpMessage message, Writer writer) throws IOException {
-        String content = message.content().toStringUtf8();
-        int status = message.status().code();
+    public void receivedResponse(HttpResponse message, Writer writer) throws OAIException {
+        String content = message.getBodyAsString(StandardCharsets.UTF_8);
+        int status = message.getStatus().getCode();
         if (status == 503) {
             long secs = retryAfterMillis / 1000;
-            if (message.headers() != null) {
+            if (message.getHeaders() != null) {
                 for (String retryAfterHeader : RETRY_AFTER_HEADERS) {
-                    String retryAfter = message.headers().get(AsciiString.of(retryAfterHeader));
+                    String retryAfter = message.getHeaders().getHeader(retryAfterHeader);
                     if (retryAfter == null) {
                         continue;
                     }
@@ -111,15 +111,19 @@ public class ListRecordsResponse extends AbstractOAIResponse {
             return;
         }
         if (status == 429) {
-            throw new TooManyRequestsException();
+            try {
+                Thread.sleep(10000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
         }
         if (status != 200) {
-            throw new IOException("status  = " + status + " response = " + content);
+            throw new OAIException("status  = " + status + " response = " + content);
         }
         // activate XSLT only if OAI XML content type is returned
-        String contentType = message.headers().get(HttpHeaderNames.CONTENT_TYPE);
+        String contentType = message.getHeaders().getHeader(HttpHeaderNames.CONTENT_TYPE);
         if (contentType != null && !contentType.startsWith("text/xml")) {
-            throw new IOException("no XML content type in response: " + contentType);
+            throw new OAIException("no XML content type in response: " + contentType);
         }
         this.filterreader = new ListRecordsFilterReader(request, this);
         try {
@@ -139,11 +143,13 @@ public class ListRecordsResponse extends AbstractOAIResponse {
                 throw new BadResumptionTokenException(request.getResumptionToken());
             } else if ("badArgument".equals(error)) {
                 throw new BadArgumentException();
+            } else if ("badVerb".equals(error)) {
+                throw new BadVerbException(error);
             } else if (error != null) {
                 throw new OAIException(error);
             }
         } catch (TransformerException t) {
-            throw new IOException(t);
+            throw new OAIException(t);
         }
     }
 

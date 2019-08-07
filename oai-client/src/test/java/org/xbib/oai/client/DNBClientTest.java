@@ -2,15 +2,12 @@ package org.xbib.oai.client;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.xbib.helianthus.client.http.HttpClient;
-import org.xbib.helianthus.common.http.AggregatedHttpMessage;
-import org.xbib.helianthus.common.http.HttpHeaderNames;
-import org.xbib.helianthus.common.http.HttpHeaders;
-import org.xbib.helianthus.common.http.HttpMethod;
+import org.xbib.net.URL;
+import org.xbib.netty.http.client.Client;
+import org.xbib.netty.http.client.Request;
 import org.xbib.oai.client.identify.IdentifyRequest;
 import org.xbib.oai.client.listrecords.ListRecordsRequest;
 import org.xbib.oai.client.listrecords.ListRecordsResponse;
@@ -19,11 +16,11 @@ import org.xbib.oai.xml.SimpleMetadataHandler;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.ConnectException;
-import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -31,21 +28,29 @@ import java.util.concurrent.atomic.AtomicLong;
 @Ignore
 public class DNBClientTest {
 
-    private static final Logger logger = LogManager.getLogger(DNBClientTest.class.getName());
+    private static final Logger logger = Logger.getLogger(DNBClientTest.class.getName());
 
     @Test
-    public void testIdentify() throws Exception {
-        OAIClient client = new OAIClient().setURL(new URL("http://services.dnb.de/oai/repository"));
-        IdentifyRequest request = client.newIdentifyRequest();
-        HttpClient httpClient = client.getHttpClient();
-        assertEquals("/oai/repository?verb=Identify", request.getPath());
-        AggregatedHttpMessage response = httpClient.get(request.getPath()).aggregate().get();
-        logger.info("{}", response.content().toStringUtf8());
+    public void testIdentify() {
+        URL url = URL.create("http://services.dnb.de/oai/repository");
+        try (OAIClient client = new OAIClient(url)) {
+            IdentifyRequest identifyRequest = client.newIdentifyRequest();
+            Client httpClient = client.getHttpClient();
+            assertEquals("/oai/repository?verb=Identify", identifyRequest.getURL().toString());
+            Request request = Request.get()
+                    .url(url.resolve(identifyRequest.getURL()))
+                    .build()
+                    .setResponseListener(resp -> logger.log(Level.INFO, resp.getBodyAsString(StandardCharsets.UTF_8)));
+            httpClient.execute(request).get();
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+        }
     }
 
     @Test
-    public void testListRecordsDNB() throws Exception {
-        try (OAIClient client = new OAIClient().setURL(new URL("http://services.dnb.de/oai/repository"))){
+    public void testListRecordsDNB() {
+        URL url = URL.create("http://services.dnb.de/oai/repository");
+        try (OAIClient client = new OAIClient(url)) {
             ListRecordsRequest listRecordsRequest = client.newListRecordsRequest();
             listRecordsRequest.setFrom(Instant.parse("2016-01-01T00:00:00Z"));
             listRecordsRequest.setUntil(Instant.parse("2016-01-10T00:00:00Z"));
@@ -54,44 +59,42 @@ public class DNBClientTest {
             Handler handler = new Handler();
             File file = File.createTempFile("dnb-bib-pica.", ".xml");
             file.deleteOnExit();
-            FileWriter sw = new FileWriter(file);
+            FileWriter fileWriter = new FileWriter(file);
             while (listRecordsRequest != null) {
                 try {
                     ListRecordsResponse listRecordsResponse = new ListRecordsResponse(listRecordsRequest);
                     listRecordsRequest.addHandler(handler);
-                    HttpClient httpClient = client.getHttpClient();
-                    AggregatedHttpMessage response =
-                            httpClient.execute(HttpHeaders.of(HttpMethod.GET, listRecordsRequest.getPath())
-                            .set(HttpHeaderNames.ACCEPT, "utf-8")).aggregate().get();
-                    String content = response.content().toStringUtf8();
-                    listRecordsResponse.receivedResponse(response, sw);
+                    Request request = Request.get()
+                            .url(url.resolve(listRecordsRequest.getURL()))
+                            .addHeader(HttpHeaderNames.ACCEPT.toString(), "utf-8")
+                            .build()
+                            .setResponseListener(resp -> listRecordsResponse.receivedResponse(resp, fileWriter));
+                    client.getHttpClient().execute(request).get();
                     listRecordsRequest = client.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
                 } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
+                    logger.log(Level.SEVERE, e.getMessage(), e);
                     listRecordsRequest = null;
                 }
             }
-            sw.close();
-            logger.info("count={}", handler.count());
-        } catch (ConnectException | ExecutionException e) {
-            logger.warn("skipped, can not connect");
-        } catch (IOException e) {
-            logger.warn("skipped, HTTP exception");
+            fileWriter.close();
+            logger.log(Level.INFO, "count=" + handler.count());
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "skipped, HTTP exception");
         }
     }
 
-    class Handler extends SimpleMetadataHandler {
+    static class Handler extends SimpleMetadataHandler {
 
         final AtomicLong count = new AtomicLong(0L);
 
         @Override
         public void startDocument() {
-            logger.debug("start doc");
+            logger.log(Level.FINE, "start doc");
         }
 
         @Override
         public void endDocument() {
-            logger.debug("end doc");
+            logger.log(Level.FINE, "end doc");
             count.incrementAndGet();
         }
 
