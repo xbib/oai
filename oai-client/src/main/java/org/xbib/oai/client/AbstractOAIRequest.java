@@ -35,7 +35,6 @@ public abstract class AbstractOAIRequest implements OAIRequest {
                 .host(url.getHost())
                 .port(url.getPort())
                 .path(url.getPath());
-
     }
 
     public URL getURL() {
@@ -98,7 +97,7 @@ public abstract class AbstractOAIRequest implements OAIRequest {
     public void setResumptionToken(ResumptionToken<?> token) {
         this.token = token;
         if (token != null && token.toString() != null) {
-            // resumption token may have characters that are illegal in URIs like '|'
+            // note: resumption token may have characters that are illegal in URIs, like '|'
             addParameter(OAIConstants.RESUMPTION_TOKEN_PARAMETER, token.toString());
         }
     }
@@ -124,53 +123,4 @@ public abstract class AbstractOAIRequest implements OAIRequest {
                 + ",until=" + getUntil()
                 + "]";
     }
-
-    /*class GetRecord extends AbstractOAIRequest {
-
-        public GetRecord() {
-            super(url);
-            addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.GET_RECORD);
-        }
-    }
-
-    class Identify extends AbstractOAIRequest {
-
-        public Identify() {
-            super(url);
-            addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.IDENTIFY);
-        }
-    }
-
-    class ListIdentifiers extends AbstractOAIRequest {
-
-        public ListIdentifiers() {
-            super(url);
-            addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.LIST_IDENTIFIERS);
-        }
-    }
-
-    class ListMetadataFormats extends AbstractOAIRequest {
-
-        public ListMetadataFormats() {
-            super(url);
-            addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.LIST_METADATA_FORMATS);
-        }
-    }
-
-    class ListRecordsRequest extends AbstractOAIRequest {
-
-        public ListRecordsRequest() {
-            super(url);
-            addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.LIST_RECORDS);
-        }
-
-    }
-
-    class ListSetsRequest extends AbstractOAIRequest {
-
-        public ListSetsRequest() {
-            super(url);
-            addParameter(OAIConstants.VERB_PARAMETER, OAIConstants.LIST_SETS);
-        }
-    }*/
 }

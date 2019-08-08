@@ -1,7 +1,5 @@
 package org.xbib.oai.client;
 
-import static org.junit.Assert.assertEquals;
-
 import io.netty.handler.codec.http.HttpHeaderNames;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -9,6 +7,7 @@ import org.xbib.net.URL;
 import org.xbib.netty.http.client.Client;
 import org.xbib.netty.http.client.Request;
 import org.xbib.oai.client.identify.IdentifyRequest;
+import org.xbib.oai.client.identify.IdentifyResponse;
 import org.xbib.oai.client.listrecords.ListRecordsRequest;
 import org.xbib.oai.client.listrecords.ListRecordsResponse;
 import org.xbib.oai.xml.SimpleMetadataHandler;
@@ -16,8 +15,12 @@ import org.xbib.oai.xml.SimpleMetadataHandler;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,58 +28,62 @@ import java.util.logging.Logger;
 /**
  *
  */
-@Ignore
 public class DNBClientTest {
 
     private static final Logger logger = Logger.getLogger(DNBClientTest.class.getName());
 
     @Test
-    public void testIdentify() {
+    public void testBibdat() {
         URL url = URL.create("http://services.dnb.de/oai/repository");
-        try (OAIClient client = new OAIClient(url)) {
-            IdentifyRequest identifyRequest = client.newIdentifyRequest();
-            Client httpClient = client.getHttpClient();
-            assertEquals("/oai/repository?verb=Identify", identifyRequest.getURL().toString());
+        try (OAIClient oaiClient = new OAIClient(url)) {
+            Client httpClient  = Client.builder()
+                    .setConnectTimeoutMillis(60 * 1000)
+                    .setReadTimeoutMillis(60 * 1000)
+                    .build();
+            IdentifyRequest identifyRequest = oaiClient.newIdentifyRequest();
+            IdentifyResponse identifyResponse = new IdentifyResponse();
             Request request = Request.get()
-                    .url(url.resolve(identifyRequest.getURL()))
+                    .url(identifyRequest.getURL())
                     .build()
-                    .setResponseListener(resp -> logger.log(Level.INFO, resp.getBodyAsString(StandardCharsets.UTF_8)));
+                    .setResponseListener(resp -> {
+                        logger.log(Level.INFO, resp.getBodyAsString(StandardCharsets.UTF_8));
+                        StringWriter sw = new StringWriter();
+                        identifyResponse.receivedResponse(resp, sw);
+                    });
             httpClient.execute(request).get();
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, e.getMessage(), e);
-        }
-    }
-
-    @Test
-    public void testListRecordsDNB() {
-        URL url = URL.create("http://services.dnb.de/oai/repository");
-        try (OAIClient client = new OAIClient(url)) {
-            ListRecordsRequest listRecordsRequest = client.newListRecordsRequest();
+            String granularity = identifyResponse.getGranularity();
+            logger.log(Level.INFO, "granularity = " + granularity);
+            DateTimeFormatter dateTimeFormatter = "YYYY-MM-DD".equals(granularity) ?
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.of("UTC")) :
+                    DateTimeFormatter.ISO_DATE_TIME;
+            ListRecordsRequest listRecordsRequest = oaiClient.newListRecordsRequest();
             listRecordsRequest.setFrom(Instant.parse("2016-01-01T00:00:00Z"));
             listRecordsRequest.setUntil(Instant.parse("2016-01-10T00:00:00Z"));
             listRecordsRequest.setSet("bib");
             listRecordsRequest.setMetadataPrefix("PicaPlus-xml");
             Handler handler = new Handler();
-            File file = File.createTempFile("dnb-bib-pica.", ".xml");
-            file.deleteOnExit();
+            File file =  new File("build/dnb-bib-pica.xml");
             FileWriter fileWriter = new FileWriter(file);
             while (listRecordsRequest != null) {
                 try {
                     ListRecordsResponse listRecordsResponse = new ListRecordsResponse(listRecordsRequest);
                     listRecordsRequest.addHandler(handler);
-                    Request request = Request.get()
-                            .url(url.resolve(listRecordsRequest.getURL()))
+                    request = Request.get()
+                            .url(listRecordsRequest.getURL())
                             .addHeader(HttpHeaderNames.ACCEPT.toString(), "utf-8")
                             .build()
                             .setResponseListener(resp -> listRecordsResponse.receivedResponse(resp, fileWriter));
-                    client.getHttpClient().execute(request).get();
-                    listRecordsRequest = client.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
+                    httpClient.execute(request).get();
+                    listRecordsRequest = oaiClient.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
+                } catch (ConnectException e) {
+                    logger.log(Level.WARNING, e.getMessage(), e);
                 } catch (IOException e) {
                     logger.log(Level.SEVERE, e.getMessage(), e);
                     listRecordsRequest = null;
                 }
             }
             fileWriter.close();
+            httpClient.shutdownGracefully();
             logger.log(Level.INFO, "count=" + handler.count());
         } catch (Exception e) {
             logger.log(Level.SEVERE, "skipped, HTTP exception");

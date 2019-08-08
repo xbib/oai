@@ -37,7 +37,10 @@ public class ArxivClientTest {
         final URL url = URL.create("http://export.arxiv.org/oai2/");
         try (OAIClient client = new OAIClient(url)) {
             IdentifyRequest identifyRequest = client.newIdentifyRequest();
-            Client httpClient = client.getHttpClient();
+            Client httpClient  = Client.builder()
+                    .setConnectTimeoutMillis(60 * 1000)
+                    .setReadTimeoutMillis(60 * 1000)
+                    .build();
             IdentifyResponse identifyResponse = new IdentifyResponse();
             Request request = Request.get()
                     .url(identifyRequest.getURL())
@@ -88,6 +91,7 @@ public class ArxivClientTest {
                 }
             }
             fileWriter.close();
+            httpClient.shutdownGracefully();
             logger.log(Level.INFO, "count = " + handler.count());
             assertTrue(handler.count() > 0L);
         } catch (Exception e) {

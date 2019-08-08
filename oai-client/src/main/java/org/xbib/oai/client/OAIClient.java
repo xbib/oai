@@ -1,7 +1,6 @@
 package org.xbib.oai.client;
 
 import org.xbib.net.URL;
-import org.xbib.netty.http.client.Client;
 import org.xbib.oai.client.getrecord.GetRecordRequest;
 import org.xbib.oai.client.identify.IdentifyRequest;
 import org.xbib.oai.client.listidentifiers.ListIdentifiersRequest;
@@ -15,24 +14,14 @@ import org.xbib.oai.util.ResumptionToken;
  */
 public class OAIClient implements AutoCloseable {
 
-    private Client client;
-
     private final URL url;
 
     public OAIClient(URL url) {
         this.url = url;
-        this.client = Client.builder()
-                .setConnectTimeoutMillis(60 * 1000)
-                .setReadTimeoutMillis(60 * 1000)
-                .build();
     }
 
     public URL getURL() {
         return url;
-    }
-
-    public Client getHttpClient() {
-        return client;
     }
 
     /**

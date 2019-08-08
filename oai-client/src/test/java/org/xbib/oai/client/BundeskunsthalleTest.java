@@ -17,6 +17,7 @@ import org.xbib.oai.exceptions.OAIException;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -26,42 +27,38 @@ import java.util.logging.Logger;
 /**
  *
  */
+@Ignore
 public class BundeskunsthalleTest {
 
     private static final Logger logger = Logger.getLogger(BundeskunsthalleTest.class.getName());
 
     @Test
-    @Ignore // takes too long time and creates files
-    public void testListRecords() throws Exception {
-        URL url = URL.create("http://www.bundeskunsthalle.de/cgi-bin/bib/oai-pmh");
+    public void testListRecords() {
+        URL url = URL.create("https://www.bundeskunsthalle.de/cgi-bin/bib/oai-pmh");
         try (OAIClient oaiClient = new OAIClient(url)) {
+            Client httpClient  = Client.builder()
+                    .setConnectTimeoutMillis(60 * 1000)
+                    .setReadTimeoutMillis(60 * 1000)
+                    .build();
             IdentifyRequest identifyRequest = oaiClient.newIdentifyRequest();
-            Client httpClient = oaiClient.getHttpClient();
             IdentifyResponse identifyResponse = new IdentifyResponse();
             Request request = Request.get()
-                    .url(url.resolve(identifyRequest.getURL()))
+                    .url(identifyRequest.getURL())
                     .addHeader(HttpHeaderNames.ACCEPT.toString(), "utf-8")
+                    .setFollowRedirect(true)
                     .build()
                     .setResponseListener(resp -> {
+                        logger.log(Level.INFO,
+                                "status = " + resp.getStatus() +
+                                " body = " + resp.getBodyAsString(StandardCharsets.UTF_8));
                         StringWriter sw = new StringWriter();
                         identifyResponse.receivedResponse(resp, sw);
                     });
             httpClient.execute(request).get();
-
-            /*AggregatedHttpMessage response = client.execute(HttpHeaders.of(HttpMethod.GET, identifyRequest.getPath())
-                    .set(HttpHeaderNames.ACCEPT, "utf-8")).aggregate().get();*/
-            // follow a maximum of 10 HTTP redirects
-            /*int max = 10;
-            while (response.followUrl() != null && max-- > 0) {
-                URI uri = URI.create(response.followUrl());
-                client = Clients.newClient(oaiClient.getFactory(), "none+" + uri, HttpClient.class);
-                response = client.execute(HttpHeaders.of(HttpMethod.GET, response.followUrl())
-                        .set(HttpHeaderNames.ACCEPT, "utf-8")).aggregate().get();
-            }*/
             String granularity = identifyResponse.getGranularity();
             logger.log(Level.INFO, "granularity = " + granularity);
             DateTimeFormatter dateTimeFormatter = "YYYY-MM-DD".equals(granularity) ?
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.of("GMT")) : null;
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.of("UTC")) : null;
             ListRecordsRequest listRecordsRequest = oaiClient.newListRecordsRequest();
             listRecordsRequest.setDateTimeFormatter(dateTimeFormatter);
             listRecordsRequest.setMetadataPrefix("marcxml");
@@ -73,11 +70,13 @@ public class BundeskunsthalleTest {
                 while (listRecordsRequest != null) {
                     try {
                         ListRecordsResponse listRecordsResponse = new ListRecordsResponse(listRecordsRequest);
-                        logger.log(Level.INFO,"sending " + listRecordsRequest.getURL());
+                        logger.log(Level.INFO, "sending " + listRecordsRequest.getURL());
                         StringWriter sw = new StringWriter();
                         request = Request.get()
-                                .url(url.resolve(listRecordsRequest.getURL()))
+                                .url(listRecordsRequest.getURL())
                                 .addHeader(HttpHeaderNames.ACCEPT.toString(), "utf-8")
+                                .setFollowRedirect(true)
+                                .setTimeoutInMillis(60 * 1000)
                                 .build()
                                 .setResponseListener(resp -> {
                                     try {
@@ -92,22 +91,18 @@ public class BundeskunsthalleTest {
                                                 .build()
                                                 .xmlReader().parse();
                                     } catch (IOException e) {
-                                        throw new OAIException(e);
+                                        throw new OAIException("MARC parser exception: " + e.getMessage(), e);
                                     }
                                     listRecordsResponse.receivedResponse(resp, sw);
-                                    logger.log(Level.FINE, "response headers = " + resp.getHeaders() +
-                                            " resumption-token = {}" + listRecordsResponse.getResumptionToken());
+                                    logger.log(Level.FINE,
+                                            "status = " + resp.getStatus() +
+                                                    " headers = " + resp.getHeaders() +
+                                                    " resumptiontoken = " + listRecordsResponse.getResumptionToken());
                                 });
                         httpClient.execute(request).get();
-                        // follow a maximum of 10 HTTP redirects
-                        /*max = 10;
-                        while (response.followUrl() != null && max-- > 0) {
-                            URI uri = URI.create(response.followUrl());
-                            client = Clients.newClient(oaiClient.getFactory(), "none+" + uri, HttpClient.class);
-                            response = client.execute(HttpHeaders.of(HttpMethod.GET, response.followUrl())
-                                    .set(HttpHeaderNames.ACCEPT, "utf-8")).aggregate().get();
-                        }*/
                         listRecordsRequest = oaiClient.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
+                    } catch (ConnectException e) {
+                        logger.log(Level.WARNING, e.getMessage(), e);
                     } catch (IOException e) {
                         logger.log(Level.SEVERE, e.getMessage(), e);
                         listRecordsRequest = null;
@@ -116,6 +111,7 @@ public class BundeskunsthalleTest {
                 writer.endCollection();
                 writer.endDocument();
             }
+            logger.log(Level.INFO, "completed");
         } catch (Exception e) {
             logger.log(Level.WARNING, e.getMessage(), e);
         }

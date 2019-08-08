@@ -6,7 +6,6 @@ import org.xbib.content.xml.util.XMLUtil;
 import org.xbib.netty.http.common.HttpResponse;
 import org.xbib.oai.client.AbstractOAIResponse;
 import org.xbib.oai.exceptions.BadVerbException;
-import org.xbib.oai.exceptions.TooManyRequestsException;
 import org.xbib.oai.exceptions.BadArgumentException;
 import org.xbib.oai.exceptions.BadResumptionTokenException;
 import org.xbib.oai.exceptions.NoRecordsMatchException;
@@ -36,6 +35,7 @@ import javax.xml.transform.stream.StreamResult;
 public class ListRecordsResponse extends AbstractOAIResponse {
 
     private static final Logger logger = Logger.getLogger(ListRecordsResponse.class.getName());
+
     private static final String[] RETRY_AFTER_HEADERS = {
             "retry-after", "Retry-after", "Retry-After"
     };
@@ -112,6 +112,7 @@ public class ListRecordsResponse extends AbstractOAIResponse {
         }
         if (status == 429) {
             try {
+                logger.log(Level.WARNING, "received 429 Too many requests, waiting 10 seconds...");
                 Thread.sleep(10000L);
             } catch (InterruptedException e) {
                 // ignore

@@ -34,8 +34,11 @@ public class DOAJClientTest {
     public void testListRecordsDOAJ() {
         URL url = URL.create("https://doaj.org/oai");
         try (OAIClient oaiClient = new OAIClient(url)) {
+            Client httpClient  = Client.builder()
+                    .setConnectTimeoutMillis(60 * 1000)
+                    .setReadTimeoutMillis(60 * 1000)
+                    .build();
             IdentifyRequest identifyRequest = oaiClient.newIdentifyRequest();
-            Client httpClient = oaiClient.getHttpClient();
             IdentifyResponse identifyResponse = new IdentifyResponse();
             Request request = Request.get()
                     .url(url.resolve(identifyRequest.getURL()))
@@ -77,6 +80,7 @@ public class DOAJClientTest {
                 listRecordsRequest = oaiClient.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
             }
             fileWriter.close();
+            httpClient.shutdownGracefully();
             logger.log(Level.INFO, "count = " + handler.count());
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
