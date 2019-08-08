@@ -148,19 +148,16 @@ subprojects {
         }
     }
 
-    tasks.withType(Pmd) {
+    pmd {
+        toolVersion = '6.11.0'
+        ruleSets = ['category/java/bestpractices.xml']
         ignoreFailures = true
-        reports {
-            xml.enabled = true
-            html.enabled = true
-        }
     }
-    tasks.withType(Checkstyle) {
+
+    checkstyle {
+        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
         ignoreFailures = true
-        reports {
-            xml.enabled = true
-            html.enabled = true
-        }
+        showViolations = true
     }
 
     sonarqube {

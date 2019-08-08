@@ -167,7 +167,9 @@ public class ListRecordsFilterReader extends XMLFilterReader {
                                     ZonedDateTime zonedDateTime = localDate.atStartOfDay(ZoneId.of("UTC"));
                                     header.setDate(Instant.from(zonedDateTime));
                                 } catch (DateTimeParseException e2) {
-                                    logger.log(Level.WARNING, "unable to parse date: " + s + " reason = " + e2.getMessage());
+                                    if (logger.isLoggable(Level.WARNING)) {
+                                        logger.log(Level.WARNING, "unable to parse date: " + s + " reason = " + e2.getMessage());
+                                    }
                                 }
                             }
                         }
