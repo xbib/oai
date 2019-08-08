@@ -20,24 +20,19 @@ subprojects {
         mavenCentral()
     }
 
-    configurations {
-        asciidoclet
-    }
-
     dependencies {
         testCompile "junit:junit:${project.property('junit.version')}"
         testCompile "org.xbib:bibliographic-character-sets:${project.property('xbib-bibliographic-character-sets.version')}"
-        asciidoclet "org.asciidoctor:asciidoclet:${project.property('asciidoclet.version')}"
     }
 
     compileJava {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     compileTestJava {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
 
     }
 
@@ -169,5 +164,4 @@ subprojects {
             property "sonar.junit.reportsPath", "build/test-results/test/"
         }
     }
-
 }
