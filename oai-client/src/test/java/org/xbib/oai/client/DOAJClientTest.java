@@ -1,8 +1,8 @@
 package org.xbib.oai.client;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.xbib.net.URL;
 import org.xbib.netty.http.client.Client;
 import org.xbib.netty.http.client.Request;
@@ -25,13 +25,13 @@ import java.util.logging.Logger;
 /**
  *
  */
-public class DOAJClientTest {
+class DOAJClientTest {
 
     private static final Logger logger = Logger.getLogger(DOAJClientTest.class.getName());
 
     @Test
-    @Ignore // takes too long time
-    public void testListRecordsDOAJ() {
+    @Disabled // takes too long time
+    void testListRecordsDOAJ() {
         URL url = URL.create("https://doaj.org/oai");
         try (OAIClient oaiClient = new OAIClient(url)) {
             Client httpClient  = Client.builder()

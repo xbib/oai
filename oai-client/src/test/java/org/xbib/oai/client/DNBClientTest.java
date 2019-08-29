@@ -1,8 +1,7 @@
 package org.xbib.oai.client;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xbib.net.URL;
 import org.xbib.netty.http.client.Client;
 import org.xbib.netty.http.client.Request;
@@ -28,12 +27,12 @@ import java.util.logging.Logger;
 /**
  *
  */
-public class DNBClientTest {
+class DNBClientTest {
 
     private static final Logger logger = Logger.getLogger(DNBClientTest.class.getName());
 
     @Test
-    public void testBibdat() {
+    void testBibdat() {
         URL url = URL.create("http://services.dnb.de/oai/repository");
         try (OAIClient oaiClient = new OAIClient(url)) {
             Client httpClient  = Client.builder()

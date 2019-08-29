@@ -1,9 +1,8 @@
 package org.xbib.oai.client;
 
-import static org.junit.Assert.assertTrue;
-
 import io.netty.handler.codec.http.HttpHeaderNames;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 import org.xbib.net.URL;
 import org.xbib.netty.http.client.Client;
 import org.xbib.netty.http.client.Request;
@@ -28,12 +27,12 @@ import java.util.logging.Logger;
 /**
  *
  */
-public class ArxivClientTest {
+class ArxivClientTest {
 
     private static final Logger logger = Logger.getLogger(ArxivClientTest.class.getName());
 
     @Test
-    public void testListRecordsArxiv() {
+    void testListRecordsArxiv() {
         final URL url = URL.create("http://export.arxiv.org/oai2/");
         try (OAIClient client = new OAIClient(url)) {
             IdentifyRequest identifyRequest = client.newIdentifyRequest();

@@ -21,7 +21,10 @@ subprojects {
     }
 
     dependencies {
-        testCompile "junit:junit:${project.property('junit.version')}"
+        testCompile "org.junit.jupiter:junit-jupiter-api:${project.property('junit.version')}"
+        testCompile "org.junit.jupiter:junit-jupiter-params:${project.property('junit.version')}"
+        testCompile "org.junit.jupiter:junit-jupiter-engine:${project.property('junit.version')}"
+        //testCompile "org.junit.vintage:junit-vintage-engine:${project.property('junit.version')}"
         testCompile "org.xbib:bibliographic-character-sets:${project.property('xbib-bibliographic-character-sets.version')}"
     }
 
@@ -45,10 +48,20 @@ subprojects {
     }
 
     test {
-        systemProperty 'java.util.logging.config.file', 'src/test/resources/logging.properties'
+        useJUnitPlatform()
+        failFast = false
         testLogging {
-            showStandardStreams = true
-            exceptionFormat = 'full'
+            events 'STARTED', 'PASSED', 'FAILED', 'SKIPPED'
+            showStandardStreams = false
+        }
+        afterSuite { desc, result ->
+            if (!desc.parent) {
+                println "\nTest result: ${result.resultType}"
+                println "Test summary: ${result.testCount} tests, " +
+                        "${result.successfulTestCount} succeeded, " +
+                        "${result.failedTestCount} failed, " +
+                        "${result.skippedTestCount} skipped"
+            }
         }
     }
 

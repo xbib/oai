@@ -1,8 +1,8 @@
 package org.xbib.oai.client;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.xbib.marc.Marc;
 import org.xbib.marc.json.MarcJsonWriter;
 import org.xbib.marc.xml.MarcContentHandler;
@@ -27,13 +27,13 @@ import java.util.logging.Logger;
 /**
  *
  */
-@Ignore
-public class BundeskunsthalleTest {
+@Disabled
+class BundeskunsthalleTest {
 
     private static final Logger logger = Logger.getLogger(BundeskunsthalleTest.class.getName());
 
     @Test
-    public void testListRecords() {
+    void testListRecords() {
         URL url = URL.create("https://www.bundeskunsthalle.de/cgi-bin/bib/oai-pmh");
         try (OAIClient oaiClient = new OAIClient(url)) {
             Client httpClient  = Client.builder()
