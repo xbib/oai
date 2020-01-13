@@ -1,5 +1,3 @@
-rootProject.name = name
-
 include 'oai-common'
 include 'oai-client'
 include 'oai-server'

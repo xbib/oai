@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.xbib.net.URL;
 import org.xbib.netty.http.client.Client;
-import org.xbib.netty.http.client.Request;
+import org.xbib.netty.http.client.api.Request;
 import org.xbib.oai.client.identify.IdentifyRequest;
 import org.xbib.oai.client.identify.IdentifyResponse;
 import org.xbib.oai.client.listrecords.ListRecordsRequest;
@@ -34,23 +34,23 @@ class ArxivClientTest {
     @Test
     void testListRecordsArxiv() {
         final URL url = URL.create("http://export.arxiv.org/oai2/");
-        try (OAIClient client = new OAIClient(url)) {
+        try (Client httpClient = Client.builder()
+                .setConnectTimeoutMillis(60 * 1000)
+                .setReadTimeoutMillis(60 * 1000)
+                .build();
+              OAIClient client = new OAIClient(url)) {
             IdentifyRequest identifyRequest = client.newIdentifyRequest();
-            Client httpClient  = Client.builder()
-                    .setConnectTimeoutMillis(60 * 1000)
-                    .setReadTimeoutMillis(60 * 1000)
-                    .build();
             IdentifyResponse identifyResponse = new IdentifyResponse();
             Request request = Request.get()
                     .url(identifyRequest.getURL())
                     .addHeader(HttpHeaderNames.ACCEPT.toString(), "utf-8")
-                    .build()
                     .setResponseListener(resp -> {
                         logger.log(Level.INFO,
                                 " body = " + resp.getBodyAsString(StandardCharsets.UTF_8));
                         StringWriter sw = new StringWriter();
                         identifyResponse.receivedResponse(resp, sw);
-                    });
+                    })
+                    .build();
             httpClient.execute(request).get();
             String granularity = identifyResponse.getGranularity();
             logger.log(Level.INFO, "granularity = " + granularity);
@@ -76,12 +76,12 @@ class ArxivClientTest {
                     request = Request.get()
                             .url(listRecordsRequest.getURL())
                             .addHeader(HttpHeaderNames.ACCEPT.toString(), "utf-8")
-                            .build()
                             .setResponseListener(resp -> {
                                 listRecordsResponse.receivedResponse(resp, fileWriter);
                                 logger.log(Level.FINE, "response headers = " + resp.getHeaders() +
                                         " resumption-token = " + listRecordsResponse.getResumptionToken());
-                            });
+                            })
+                            .build();
                     httpClient.execute(request).get();
                     listRecordsRequest = client.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
                 } catch (IOException e) {
@@ -90,7 +90,6 @@ class ArxivClientTest {
                 }
             }
             fileWriter.close();
-            httpClient.shutdownGracefully();
             logger.log(Level.INFO, "count = " + handler.count());
             assertTrue(handler.count() > 0L);
         } catch (Exception e) {

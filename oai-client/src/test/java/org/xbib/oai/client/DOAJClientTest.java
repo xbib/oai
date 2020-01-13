@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.xbib.net.URL;
 import org.xbib.netty.http.client.Client;
-import org.xbib.netty.http.client.Request;
+import org.xbib.netty.http.client.api.Request;
 import org.xbib.oai.client.identify.IdentifyRequest;
 import org.xbib.oai.client.identify.IdentifyResponse;
 import org.xbib.oai.client.listrecords.ListRecordsRequest;
@@ -33,21 +33,21 @@ class DOAJClientTest {
     @Disabled // takes too long time
     void testListRecordsDOAJ() {
         URL url = URL.create("https://doaj.org/oai");
-        try (OAIClient oaiClient = new OAIClient(url)) {
-            Client httpClient  = Client.builder()
-                    .setConnectTimeoutMillis(60 * 1000)
-                    .setReadTimeoutMillis(60 * 1000)
-                    .build();
+        try (Client httpClient = Client.builder()
+                .setConnectTimeoutMillis(60 * 1000)
+                .setReadTimeoutMillis(60 * 1000)
+                .build();
+             OAIClient oaiClient = new OAIClient(url)) {
             IdentifyRequest identifyRequest = oaiClient.newIdentifyRequest();
             IdentifyResponse identifyResponse = new IdentifyResponse();
             Request request = Request.get()
                     .url(url.resolve(identifyRequest.getURL()))
                     .addHeader(HttpHeaderNames.ACCEPT.toString(), "utf-8")
-                    .build()
                     .setResponseListener(resp -> {
                         StringWriter sw = new StringWriter();
                         identifyResponse.receivedResponse(resp, sw);
-                    });
+                    })
+                    .build();
             httpClient.execute(request).get();
             String granularity = identifyResponse.getGranularity();
             logger.log(Level.INFO, "granularity = " + granularity);
@@ -70,17 +70,16 @@ class DOAJClientTest {
                 request = Request.get()
                         .url(url.resolve(listRecordsRequest.getURL()))
                         .addHeader(HttpHeaderNames.ACCEPT.toString(), "utf-8")
-                        .build()
                         .setResponseListener(resp -> {
                             listRecordsResponse.receivedResponse(resp, fileWriter);
                             logger.log(Level.FINE, "response headers = " + resp.getHeaders() +
                                     " resumption-token = {}" + listRecordsResponse.getResumptionToken());
-                        });
+                        })
+                        .build();
                 httpClient.execute(request).get();
                 listRecordsRequest = oaiClient.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
             }
             fileWriter.close();
-            httpClient.shutdownGracefully();
             logger.log(Level.INFO, "count = " + handler.count());
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);

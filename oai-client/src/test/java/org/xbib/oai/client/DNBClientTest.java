@@ -4,7 +4,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import org.junit.jupiter.api.Test;
 import org.xbib.net.URL;
 import org.xbib.netty.http.client.Client;
-import org.xbib.netty.http.client.Request;
+import org.xbib.netty.http.client.api.Request;
 import org.xbib.oai.client.identify.IdentifyRequest;
 import org.xbib.oai.client.identify.IdentifyResponse;
 import org.xbib.oai.client.listrecords.ListRecordsRequest;
@@ -34,21 +34,21 @@ class DNBClientTest {
     @Test
     void testBibdat() {
         URL url = URL.create("http://services.dnb.de/oai/repository");
-        try (OAIClient oaiClient = new OAIClient(url)) {
-            Client httpClient  = Client.builder()
-                    .setConnectTimeoutMillis(60 * 1000)
-                    .setReadTimeoutMillis(60 * 1000)
-                    .build();
+        try (Client httpClient = Client.builder()
+                .setConnectTimeoutMillis(60 * 1000)
+                .setReadTimeoutMillis(60 * 1000)
+                .build();
+             OAIClient oaiClient = new OAIClient(url)) {
             IdentifyRequest identifyRequest = oaiClient.newIdentifyRequest();
             IdentifyResponse identifyResponse = new IdentifyResponse();
             Request request = Request.get()
                     .url(identifyRequest.getURL())
-                    .build()
                     .setResponseListener(resp -> {
                         logger.log(Level.INFO, resp.getBodyAsString(StandardCharsets.UTF_8));
                         StringWriter sw = new StringWriter();
                         identifyResponse.receivedResponse(resp, sw);
-                    });
+                    })
+                    .build();
             httpClient.execute(request).get();
             String granularity = identifyResponse.getGranularity();
             logger.log(Level.INFO, "granularity = " + granularity);
@@ -70,8 +70,8 @@ class DNBClientTest {
                     request = Request.get()
                             .url(listRecordsRequest.getURL())
                             .addHeader(HttpHeaderNames.ACCEPT.toString(), "utf-8")
-                            .build()
-                            .setResponseListener(resp -> listRecordsResponse.receivedResponse(resp, fileWriter));
+                            .setResponseListener(resp -> listRecordsResponse.receivedResponse(resp, fileWriter))
+                            .build();
                     httpClient.execute(request).get();
                     listRecordsRequest = oaiClient.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
                 } catch (ConnectException e) {
@@ -82,7 +82,6 @@ class DNBClientTest {
                 }
             }
             fileWriter.close();
-            httpClient.shutdownGracefully();
             logger.log(Level.INFO, "count=" + handler.count());
         } catch (Exception e) {
             logger.log(Level.SEVERE, "skipped, HTTP exception");

@@ -2,7 +2,7 @@
 dependencies {
     compile project(':oai-common')
     compile "org.xbib:netty-http-client:${project.property('xbib-netty-http.version')}"
-    testCompile "io.netty:netty-tcnative-boringssl-static:${project.property('tcnative.version')}"
+    compile "io.netty:netty-tcnative-boringssl-static:${project.property('tcnative.version')}"
     testCompile "org.xbib:marc:${project.property('xbib-marc.version')}"
     testCompile "org.xbib:bibliographic-character-sets:${project.property('xbib-bibliographic-character-sets.version')}"
 }
