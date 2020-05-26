@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
@@ -29,15 +27,13 @@ import javax.xml.stream.events.Namespace;
  */
 public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements OAIConstants {
 
-    private static final Logger logger = Logger.getLogger(XmlSimpleMetadataHandler.class.getName());
-
     private static final XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
 
     private static final XMLEventFactory eventFactory = XMLEventFactory.newInstance();
 
     private List<String> namespaces = new ArrayList<>();
 
-    private Deque<Collection<Namespace>> nsStack = new ArrayDeque<>();
+    private final Deque<Collection<Namespace>> nsStack = new ArrayDeque<>();
 
     private Locator locator;
 
@@ -49,14 +45,10 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
 
     private boolean needToCallStartDocument = false;
 
-    public XmlSimpleMetadataHandler setWriter(Writer writer) {
+    public XmlSimpleMetadataHandler setWriter(Writer writer) throws XMLStreamException {
         this.writer = writer;
-        try {
-            outputFactory.setProperty("javax.xml.stream.isRepairingNamespaces", Boolean.TRUE);
-            this.eventWriter = outputFactory.createXMLEventWriter(writer);
-        } catch (XMLStreamException e) {
-            logger.log(Level.FINE, e.getMessage(), e);
-        }
+        outputFactory.setProperty("javax.xml.stream.isRepairingNamespaces", Boolean.TRUE);
+        this.eventWriter = outputFactory.createXMLEventWriter(writer);
         return this;
     }
 
@@ -150,7 +142,7 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
             try {
                 eventWriter.add(eventFactory.createStartDocument());
             } catch (XMLStreamException e) {
-                logger.log(Level.FINE, e.getMessage(), e);
+                throw new SAXException(e);
             }
             needToCallStartDocument = false;
         }
@@ -272,10 +264,14 @@ public class XmlSimpleMetadataHandler extends SimpleMetadataHandler implements O
     }
 
     private static final class SAXLocation implements Location {
-        private int lineNumber;
-        private int columnNumber;
-        private String publicId;
-        private String systemId;
+
+        private final int lineNumber;
+
+        private final int columnNumber;
+
+        private final String publicId;
+
+        private final String systemId;
 
         private SAXLocation(Locator locator) {
             lineNumber = locator.getLineNumber();

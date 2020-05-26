@@ -1,6 +1,5 @@
 package org.xbib.oai.client.listrecords;
 
-import io.netty.handler.codec.http.HttpHeaderNames;
 import org.xbib.content.xml.transform.TransformerURIResolver;
 import org.xbib.content.xml.util.XMLUtil;
 import org.xbib.netty.http.common.HttpResponse;
@@ -16,12 +15,9 @@ import org.xml.sax.InputSource;
 import java.io.StringReader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -33,8 +29,6 @@ import javax.xml.transform.stream.StreamResult;
  *
  */
 public class ListRecordsResponse extends AbstractOAIResponse {
-
-    private static final Logger logger = Logger.getLogger(ListRecordsResponse.class.getName());
 
     private static final String[] RETRY_AFTER_HEADERS = {
             "retry-after", "Retry-after", "Retry-After"
@@ -93,26 +87,21 @@ public class ListRecordsResponse extends AbstractOAIResponse {
                         // parse RFC date, e.g. Fri, 31 Dec 1999 23:59:59 GMT
                         Instant instant = Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(retryAfter));
                         secs = ChronoUnit.SECONDS.between(instant, Instant.now());
-                        logger.log(Level.INFO, MessageFormat.format("parsed delay seconds is {0}", secs));
                     }
-                    logger.log(Level.INFO, MessageFormat.format("setting delay seconds to {0}", secs));
                 }
             }
             request.setRetry(true);
             try {
                 if (secs > 0L) {
-                    logger.log(Level.INFO, MessageFormat.format("waiting for {0} seconds (retry-after)", secs));
                     Thread.sleep(1000 * secs);
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                logger.log(Level.SEVERE, "interrupted");
             }
             return;
         }
         if (status == 429) {
             try {
-                logger.log(Level.WARNING, "received 429 Too many requests, waiting 10 seconds...");
                 Thread.sleep(10000L);
             } catch (InterruptedException e) {
                 // ignore
@@ -122,7 +111,7 @@ public class ListRecordsResponse extends AbstractOAIResponse {
             throw new OAIException("status  = " + status + " response = " + content);
         }
         // activate XSLT only if OAI XML content type is returned
-        String contentType = message.getHeaders().getHeader(HttpHeaderNames.CONTENT_TYPE);
+        String contentType = message.getHeaders().getHeader("content-type");
         if (contentType != null && !contentType.startsWith("text/xml")) {
             throw new OAIException("no XML content type in response: " + contentType);
         }
@@ -133,7 +122,6 @@ public class ListRecordsResponse extends AbstractOAIResponse {
             Transformer transformer = transformerFactory.newTransformer();
             Source source = new SAXSource(filterreader, new InputSource(new StringReader(XMLUtil.sanitize(content))));
             StreamResult streamResult = new StreamResult(writer);
-            logger.log(Level.FINE, "transforming");
             transformer.transform(source, streamResult);
             if ("noRecordsMatch".equals(error)) {
                 throw new NoRecordsMatchException("metadataPrefix=" + request.getMetadataPrefix()

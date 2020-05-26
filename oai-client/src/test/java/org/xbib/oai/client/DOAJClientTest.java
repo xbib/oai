@@ -12,9 +12,10 @@ import org.xbib.oai.client.listrecords.ListRecordsRequest;
 import org.xbib.oai.client.listrecords.ListRecordsResponse;
 import org.xbib.oai.xml.SimpleMetadataHandler;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.StringWriter;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -30,7 +31,7 @@ class DOAJClientTest {
     private static final Logger logger = Logger.getLogger(DOAJClientTest.class.getName());
 
     @Test
-    @Disabled // takes too long time
+    @Disabled("takes long time")
     void testListRecordsDOAJ() {
         URL url = URL.create("https://doaj.org/oai");
         try (Client httpClient = Client.builder()
@@ -60,26 +61,24 @@ class DOAJClientTest {
             listRecordsRequest.setUntil(Instant.parse("2018-01-01T00:00:00Z"));
             listRecordsRequest.setMetadataPrefix("oai_dc");
             Handler handler = new Handler();
-            File file = File.createTempFile("doaj.", ".xml");
-            file.deleteOnExit();
-            FileWriter fileWriter = new FileWriter(file);
-            while (listRecordsRequest != null) {
-                ListRecordsResponse listRecordsResponse = new ListRecordsResponse(listRecordsRequest);
-                listRecordsRequest.addHandler(handler);
-                logger.log(Level.INFO,"sending " + listRecordsRequest.getURL());
-                request = Request.get()
-                        .url(url.resolve(listRecordsRequest.getURL()))
-                        .addHeader(HttpHeaderNames.ACCEPT.toString(), "utf-8")
-                        .setResponseListener(resp -> {
-                            listRecordsResponse.receivedResponse(resp, fileWriter);
-                            logger.log(Level.FINE, "response headers = " + resp.getHeaders() +
-                                    " resumption-token = {}" + listRecordsResponse.getResumptionToken());
-                        })
-                        .build();
-                httpClient.execute(request).get();
-                listRecordsRequest = oaiClient.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
+            try (Writer writer = Files.newBufferedWriter(Paths.get("build/doaj.xml"))) {
+                while (listRecordsRequest != null) {
+                    ListRecordsResponse listRecordsResponse = new ListRecordsResponse(listRecordsRequest);
+                    listRecordsRequest.addHandler(handler);
+                    logger.log(Level.INFO, "sending " + listRecordsRequest.getURL());
+                    request = Request.get()
+                            .url(url.resolve(listRecordsRequest.getURL()))
+                            .addHeader(HttpHeaderNames.ACCEPT.toString(), "utf-8")
+                            .setResponseListener(resp -> {
+                                listRecordsResponse.receivedResponse(resp, writer);
+                                logger.log(Level.FINE, "response headers = " + resp.getHeaders() +
+                                        " resumption-token = {}" + listRecordsResponse.getResumptionToken());
+                            })
+                            .build();
+                    httpClient.execute(request).get();
+                    listRecordsRequest = oaiClient.resume(listRecordsRequest, listRecordsResponse.getResumptionToken());
+                }
             }
-            fileWriter.close();
             logger.log(Level.INFO, "count = " + handler.count());
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);

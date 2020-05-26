@@ -28,12 +28,12 @@ import java.util.logging.Logger;
 /**
  *
  */
-@Disabled("takes very long time")
 class BundeskunsthalleTest {
 
     private static final Logger logger = Logger.getLogger(BundeskunsthalleTest.class.getName());
 
     @Test
+    @Disabled("takes long time")
     void testListRecords() {
         URL url = URL.create("https://www.bundeskunsthalle.de/cgi-bin/bib/oai-pmh");
         try (Client httpClient = Client.builder()
@@ -63,7 +63,7 @@ class BundeskunsthalleTest {
             ListRecordsRequest listRecordsRequest = oaiClient.newListRecordsRequest();
             listRecordsRequest.setDateTimeFormatter(dateTimeFormatter);
             listRecordsRequest.setMetadataPrefix("marcxml");
-            try (MarcJsonWriter writer = new MarcJsonWriter("bk-bulk%d.jsonl", 1000,
+            try (MarcJsonWriter writer = new MarcJsonWriter("build/bk-bulk%d.jsonl", 1000,
                     EnumSet.of(MarcJsonWriter.Style.ELASTICSEARCH_BULK), 65536, false)
                     .setIndex("testindex", "testtype")) {
                 writer.startDocument();

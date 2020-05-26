@@ -7,6 +7,7 @@ import org.xbib.oai.util.ResumptionToken;
 import org.xbib.oai.xml.MetadataHandler;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.ContentHandler;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -14,21 +15,17 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  */
 public class ListRecordsFilterReader extends XMLFilterReader {
 
-    private static final Logger logger = Logger.getLogger(ListRecordsFilterReader.class.getName());
-
     private final ListRecordsRequest request;
 
     private final ListRecordsResponse response;
 
-    private StringBuilder content;
+    private final StringBuilder content;
 
     private RecordHeader header;
 
@@ -54,14 +51,12 @@ public class ListRecordsFilterReader extends XMLFilterReader {
 
     @Override
     public void startDocument() throws SAXException {
-        logger.log(Level.FINE, "start of document");
         super.startDocument();
         request.setResumptionToken(null);
     }
 
     @Override
     public void endDocument() throws SAXException {
-        logger.log(Level.FINE, "end of document");
         super.endDocument();
     }
 
@@ -97,7 +92,6 @@ public class ListRecordsFilterReader extends XMLFilterReader {
                             request.setResumptionToken(token);
                         }
                     } catch (Exception e) {
-                        logger.log(Level.FINE, e.getMessage(), e);
                         throw new SAXException(e);
                     }
                     break;
@@ -139,7 +133,6 @@ public class ListRecordsFilterReader extends XMLFilterReader {
                         // feedback to request
                         request.setResumptionToken(token);
                     } else {
-                        logger.log(Level.WARNING, "empty resumption token value");
                         // some servers send a null or an empty token as last token
                         token = null;
                         request.setResumptionToken(null);
@@ -167,9 +160,7 @@ public class ListRecordsFilterReader extends XMLFilterReader {
                                     ZonedDateTime zonedDateTime = localDate.atStartOfDay(ZoneId.of("UTC"));
                                     header.setDate(Instant.from(zonedDateTime));
                                 } catch (DateTimeParseException e2) {
-                                    if (logger.isLoggable(Level.WARNING)) {
-                                        logger.log(Level.WARNING, "unable to parse date: " + s + " reason = " + e2.getMessage());
-                                    }
+                                    throw new IllegalArgumentException("unable to parse: " + e2.getMessage(), e2);
                                 }
                             }
                         }

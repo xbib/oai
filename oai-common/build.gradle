@@ -1,3 +1,5 @@
 dependencies {
-    compile "org.xbib:content-rdf:${project.property('xbib-content.version')}"
+    api "org.xbib:content-rdf:${project.property('xbib-content.version')}"
+    api "org.xbib:content-resource:${project.property('xbib-content.version')}"
+    api "org.xbib:content-xml:${project.property('xbib-content.version')}"
 }

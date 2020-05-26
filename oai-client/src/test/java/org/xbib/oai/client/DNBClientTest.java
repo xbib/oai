@@ -1,6 +1,7 @@
 package org.xbib.oai.client;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.xbib.net.URL;
 import org.xbib.netty.http.client.Client;
@@ -18,8 +19,6 @@ import java.io.StringWriter;
 import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,9 +51,6 @@ class DNBClientTest {
             httpClient.execute(request).get();
             String granularity = identifyResponse.getGranularity();
             logger.log(Level.INFO, "granularity = " + granularity);
-            DateTimeFormatter dateTimeFormatter = "YYYY-MM-DD".equals(granularity) ?
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.of("UTC")) :
-                    DateTimeFormatter.ISO_DATE_TIME;
             ListRecordsRequest listRecordsRequest = oaiClient.newListRecordsRequest();
             listRecordsRequest.setFrom(Instant.parse("2016-01-01T00:00:00Z"));
             listRecordsRequest.setUntil(Instant.parse("2016-01-10T00:00:00Z"));
@@ -83,6 +79,7 @@ class DNBClientTest {
             }
             fileWriter.close();
             logger.log(Level.INFO, "count=" + handler.count());
+            assertTrue(handler.count() > 0);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "skipped, HTTP exception");
         }

@@ -4,7 +4,7 @@ import org.xbib.content.rdf.RdfContentParams;
 import org.xbib.content.rdf.io.xml.AbstractXmlResourceHandler;
 import org.xbib.content.rdf.io.xml.XmlHandler;
 import org.xbib.content.resource.IRI;
-import org.xbib.content.resource.IRINamespaceContext;
+import org.xbib.content.resource.NamespaceContext;
 import org.xbib.oai.OAIConstants;
 
 import javax.xml.namespace.QName;
@@ -48,12 +48,12 @@ public class RdfResourceHandler extends AbstractXmlResourceHandler<RdfContentPar
     }
 
     @Override
-    public XmlHandler<RdfContentParams> setNamespaceContext(IRINamespaceContext namespaceContext) {
+    public XmlHandler<RdfContentParams> setNamespaceContext(NamespaceContext namespaceContext) {
         return this;
     }
 
     @Override
-    public IRINamespaceContext getNamespaceContext() {
+    public NamespaceContext getNamespaceContext() {
         return getParams().getNamespaceContext();
     }
 }
